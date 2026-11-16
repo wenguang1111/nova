@@ -19,6 +19,8 @@ let startTimeout = null; // --- ADDED: Track the start delay
 
 let activeDrillParams = null;
 let activeDrillRandom = false;
+// Settings of the run in progress (null when idle): { drill, level, mode, reps, timeSec, pauseSec, source }.
+let runConfig = null;
 
 // UI Elements (Cached for performance)
 const ui = {
@@ -36,11 +38,30 @@ document.addEventListener('language-changed', () => {
     if (!isRunning && showingGo) ui.display.textContent = t("GO!");
 });
 
-export function startDrillSequence(drillName) {
-    const rawParams = currentDrills[drillName] ? currentDrills[drillName][selectedLevel] : null;
+// Run settings taken from the local controls.
+export function localRunConfig() {
+    const pauseInput = parseFloat(document.getElementById('input-pause').value);
+    return {
+        level: selectedLevel,
+        mode: runMode,
+        reps: parseInt(document.getElementById('input-reps').value) || 1,
+        timeSec: parseInt(document.getElementById('input-time').value),
+        pauseSec: isNaN(pauseInput) ? 1.0 : pauseInput,
+        source: 'local'
+    };
+}
+
+// 'local', 'remote', or null when no countdown or run is in progress.
+export function activeRunSource() {
+    return runConfig ? runConfig.source : null;
+}
+
+// Returns true when the countdown started.
+export function startDrillSequence(drillName, config = localRunConfig()) {
+    const rawParams = Object.hasOwn(currentDrills, drillName) ? currentDrills[drillName][config.level] : null;
     if(!rawParams) {
          log(t("Drill data not found: {name}", { name: drillName }));
-         return;
+         return false;
     }
 
     // --- FILTER INACTIVE STEPS ---
@@ -52,9 +73,10 @@ export function startDrillSequence(drillName) {
     if (executableSteps.length === 0) {
         showToast(t("no active balls to play"));
         document.querySelectorAll('.btn-drill').forEach(b => b.classList.remove('running'));
-        return;
+        return false;
     }
     
+    runConfig = { ...config, drill: drillName };
     activeDrillParams = executableSteps;
     activeDrillRandom = !!currentDrills[drillName].random;
     
@@ -93,6 +115,7 @@ export function startDrillSequence(drillName) {
             startTimeout = setTimeout(beginDrillExecution, 800);
         }
     }, 1000);
+    return true;
 }
 
 export function beginDrillExecution() {
@@ -113,9 +136,8 @@ export function beginDrillExecution() {
     ui.progress.style.transition = 'none';
     ui.progress.style.strokeDashoffset = '0';
 
-    if (runMode === 'time') {
-        const tVal = document.getElementById('input-time').value;
-        remainingTime = parseInt(tVal);
+    if (runConfig.mode === 'time') {
+        remainingTime = runConfig.timeSec;
         ui.display.textContent = formatTime(remainingTime);
         
         requestAnimationFrame(() => {
@@ -129,11 +151,11 @@ export function beginDrillExecution() {
             if (!isPaused) {
                 remainingTime--;
                 ui.display.textContent = formatTime(remainingTime);
-                if (remainingTime <= 0) stopRun();
+                if (remainingTime <= 0) stopRun('finished');
             }
         }, 1000);
     } else {
-        targetCount = parseInt(document.getElementById('input-reps').value) || 1;
+        targetCount = runConfig.reps;
         currentCount = 0;
         ui.display.textContent = targetCount;
         ui.progress.style.transition = 'stroke-dashoffset 0.5s ease';
@@ -145,7 +167,7 @@ export function beginDrillExecution() {
 async function runIteration() {
     if(!isRunning || isPaused) return;
 
-    if (runMode === 'reps') {
+    if (runConfig.mode === 'reps') {
         const remaining = targetCount - currentCount;
         ui.display.textContent = remaining;
         
@@ -203,13 +225,12 @@ async function runIteration() {
 export function handleDone() {
     if(!isRunning) return;
     
-    if (runMode === 'reps' && currentCount >= targetCount) {
-        stopRun();
+    if (runConfig.mode === 'reps' && currentCount >= targetCount) {
+        stopRun('finished');
         return;
     }
     
-    const pauseInput = parseFloat(document.getElementById('input-pause').value);
-    const pauseMs = (isNaN(pauseInput) ? 1.0 : pauseInput) * 1000;
+    const pauseMs = runConfig.pauseSec * 1000;
 
     if (!isPaused) {
          pauseTimer = setTimeout(() => { 
@@ -244,7 +265,10 @@ export function togglePause() {
     }
 }
 
-export function stopRun() {
+// `reason` is 'finished' when the run completed on its own, otherwise 'stopped'.
+export function stopRun(reason = 'stopped') {
+    const endedRun = runConfig;
+    runConfig = null;
     isRunning = false;
     isPaused = false;
     clearInterval(countdownTimer);
@@ -259,6 +283,11 @@ export function stopRun() {
     
     sendPacket([0x80,1,0,1]); // Stop command
     log(t("Drill Stopped"));
+    if (endedRun) {
+        document.dispatchEvent(new CustomEvent('run-ended', {
+            detail: { source: endedRun.source, drill: endedRun.drill, reason }
+        }));
+    }
 }
 
 // --- NEW FUNCTION: Skip Countdown ---

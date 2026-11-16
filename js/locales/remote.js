@@ -1,0 +1,100 @@
+// English message keys for protocol codes; translated through t().
+export const REJECT_MESSAGES = {
+    declined: 'Request declined onsite',
+    timeout: 'Request expired before onsite confirmation',
+    busy: 'Robot is busy',
+    not_connected: 'Robot is not connected',
+    unknown_drill: 'Drill not available',
+    limit_exceeded: 'Request exceeds limits',
+    invalid: 'Invalid request',
+    replay: 'Duplicate or out-of-order request'
+};
+
+export const SESSION_END_MESSAGES = {
+    expired: 'Remote session expired',
+    controller_left: 'Remote controller disconnected',
+    host_ended: 'Remote session ended',
+    host_left: 'Robot phone disconnected',
+    relay_shutdown: 'Relay shut down'
+};
+
+export const RELAY_ERROR_MESSAGES = {
+    invalid_invite: 'Invite is invalid, used or expired',
+    rate_limited: 'Too many requests, wait a moment',
+    replay: 'Duplicate or out-of-order request',
+    invalid: 'Invalid request',
+    limit_exceeded: 'Request exceeds limits',
+    unsupported_version: 'Page version does not match the relay',
+    unknown_type: 'Invalid request'
+};
+
+export const remoteMessages = {
+    'Remote Control': '远程控制',
+    'Remote control active': '远程控制进行中',
+    'End': '结束',
+    'Remote requests run only after you confirm them here. Stop on this phone always overrides the remote controller.':
+        '远程请求必须在此手机上确认后才会执行。本机的停止操作始终优先于远程控制。',
+    'Relay URL': '中继服务器地址',
+    'Max motor RPM': '最高电机转速',
+    'Max ball frequency': '最高发球频率',
+    'Single-use invite link': '一次性邀请链接',
+    'Share invite': '分享邀请',
+    'Start remote session': '开启远程会话',
+    'End remote session': '结束远程会话',
+    'Remote start request': '远程开始请求',
+    'Make sure nobody is in front of the robot before allowing.': '允许前请确认发球机前方无人。',
+    'Decline': '拒绝',
+    'Allow': '允许',
+    'Remote control is off': '远程控制未开启',
+    'Remote request rejected: {reason}': '远程请求被拒绝：{reason}',
+    '{reps} reps': '{reps} 次',
+    '{seconds} s': '{seconds} 秒',
+    '{drill} · level {level} · {amount} · pause {pause} s': '{drill} · 难度 {level} · {amount} · 间隔 {pause} 秒',
+    'Expires in {seconds} s': '{seconds} 秒后过期',
+    'Stopped by remote controller': '已被远程控制端停止',
+    'Screen wake lock unavailable: {error}': '无法保持屏幕常亮：{error}',
+    'Waiting for remote controller': '等待远程控制端加入',
+    'Remote controller connected': '远程控制端已连接',
+    'Relay error: {code}': '中继服务器错误：{code}',
+    'Enter a wss:// relay URL': '请输入 wss:// 开头的中继服务器地址',
+    'Relay connection lost': '与中继服务器的连接已断开',
+    'Connecting to relay…': '正在连接中继服务器…',
+    'Remote session ended': '远程会话已结束',
+    'Nova remote control': 'Nova 远程控制',
+    'Invite link copied': '邀请链接已复制',
+    'Copy the link manually': '请手动复制链接',
+    'Remote session ended because the page was hidden': '页面被切到后台，远程会话已结束',
+    'Nova Remote Controller': 'Nova 远程控制端',
+    'Mode': '模式',
+    'Request start': '请求开始',
+    'Every start must be allowed by the person at the robot. If this page loses its connection, the robot phone stops remotely started drills, but a stop can still fail to reach the robot; the onsite person must be able to switch it off.':
+        '每次开始都必须由发球机旁的人允许。本页面断开连接时，发球机端手机会停止远程启动的训练，但停止指令仍可能无法送达发球机；现场人员必须能够随时关闭发球机电源。',
+    'Values out of range: count {repsMin}-{repsMax}, time {timeMin}-{timeMax} s, pause {pauseMin}-{pauseMax} s':
+        '数值超出范围：次数 {repsMin}-{repsMax}，时间 {timeMin}-{timeMax} 秒，间隔 {pauseMin}-{pauseMax} 秒',
+    'Request sent': '请求已发送',
+    'Robot ready': '发球机就绪',
+    'Waiting for onsite confirmation: {drill}': '等待现场确认：{drill}',
+    'Running: {drill}': '正在运行：{drill}',
+    'Drill finished: {drill}': '训练完成：{drill}',
+    'Drill stopped: {drill}': '训练已停止：{drill}',
+    'Connected. Waiting for the robot phone…': '已连接，等待发球机端手机…',
+    'Invalid invite link': '邀请链接无效',
+    'Connection lost. Ask the onsite person for a new invite.': '连接已断开，请向现场人员索取新的邀请链接。',
+    'Could not join. The invite may be used or expired.': '无法加入，邀请可能已被使用或已过期。',
+    'Stop sent': '停止指令已发送',
+    'Request declined onsite': '现场已拒绝请求',
+    'Request expired before onsite confirmation': '请求在现场确认前已过期',
+    'Robot is busy': '发球机忙碌中',
+    'Robot is not connected': '发球机未连接',
+    'Drill not available': '该球路不可用',
+    'Request exceeds limits': '请求超出限制',
+    'Invalid request': '无效请求',
+    'Duplicate or out-of-order request': '重复或顺序错误的请求',
+    'Remote session expired': '远程会话已过期',
+    'Remote controller disconnected': '远程控制端已断开',
+    'Robot phone disconnected': '发球机端手机已断开',
+    'Relay shut down': '中继服务器已关闭',
+    'Invite is invalid, used or expired': '邀请无效、已被使用或已过期',
+    'Too many requests, wait a moment': '请求过于频繁，请稍候',
+    'Page version does not match the relay': '页面版本与中继服务器不匹配'
+};

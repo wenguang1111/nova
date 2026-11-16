@@ -1,9 +1,11 @@
 import { editorMessages } from './locales/editor.js';
 import { runtimeMessages } from './locales/runtime.js';
+import { remoteMessages } from './locales/remote.js';
 
 const messages = {
     ...editorMessages,
     ...runtimeMessages,
+    ...remoteMessages,
     'Nova Drill Control': 'Nova 球路控制',
     'Language': '语言',
     'Drill': '球路',

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="standard">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer">
+    <title data-i18n="Nova Remote Controller">Nova Remote Controller</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1 data-i18n="Nova Remote Controller">Nova Remote Controller</h1>
+        <label class="language-picker">
+            <span data-i18n="Language">Language</span>
+            <select id="language-select">
+                <option value="zh-CN">简体中文</option>
+                <option value="en">English</option>
+            </select>
+        </label>
+    </header>
+
+    <div class="settings-card controller-card">
+        <div id="controller-status" class="remote-status"></div>
+
+        <label class="remote-field">
+            <span data-i18n="Drill">Drill</span>
+            <select id="ctl-drill"></select>
+        </label>
+
+        <div class="remote-row">
+            <label class="remote-field">
+                <span data-i18n="DIFFICULTY LEVEL">DIFFICULTY LEVEL</span>
+                <select id="ctl-level"></select>
+            </label>
+            <label class="remote-field">
+                <span data-i18n="Mode">Mode</span>
+                <select id="ctl-mode">
+                    <option value="reps" data-i18n="Reps">Reps</option>
+                    <option value="time" data-i18n="Time">Time</option>
+                </select>
+            </label>
+        </div>
+
+        <div class="remote-row">
+            <label class="remote-field" id="ctl-reps-field">
+                <span data-i18n="Count">Count</span>
+                <input type="number" id="ctl-reps" value="10" min="1" max="30" step="1">
+            </label>
+            <label class="remote-field hidden" id="ctl-time-field">
+                <span data-i18n="Time (s)">Time (s)</span>
+                <input type="number" id="ctl-time" value="60" min="10" max="300" step="10">
+            </label>
+            <label class="remote-field">
+                <span data-i18n="Pause (s)">Pause (s)</span>
+                <input type="number" id="ctl-pause" value="1.0" min="0.5" max="5" step="0.1">
+            </label>
+        </div>
+
+        <button id="ctl-request" class="btn-connect" disabled data-i18n="Request start">Request start</button>
+        <button id="ctl-stop" class="btn-remote-stop" disabled data-i18n="STOP">STOP</button>
+
+        <p class="remote-note" data-i18n="Every start must be allowed by the person at the robot. If this page loses its connection, the robot phone stops remotely started drills, but a stop can still fail to reach the robot; the onsite person must be able to switch it off.">Every start must be allowed by the person at the robot. If this page loses its connection, the robot phone stops remotely started drills, but a stop can still fail to reach the robot; the onsite person must be able to switch it off.</p>
+    </div>
+
+    <div id="log" class="log-box"></div>
+</div>
+
+<div id="toast"></div>
+
+<script type="module" src="js/remote-controller.js"></script>
+</body>
+</html>

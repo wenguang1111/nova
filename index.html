@@ -32,6 +32,7 @@
         
         <div class="theme-item" onclick="exportCustomDrills()"><span class="color-preview" style="background:var(--text)"></span> <span data-i18n="Export Drills">Export Drills</span></div>
         <div class="theme-item" onclick="document.getElementById('csv-input').click()"><span class="color-preview" style="background:var(--text)"></span> <span data-i18n="Import Drills">Import Drills</span></div>
+        <div class="theme-item" onclick="window.openRemoteModal()"><span class="color-preview" style="background:#6c5ce7"></span> <span data-i18n="Remote Control">Remote Control</span></div>
         
         <div style="border-top: 1px solid var(--border); margin: 5px 0;"></div>
         <div class="menu-title" data-i18n="Theme">Theme</div>
@@ -52,6 +53,10 @@
     <input type="file" id="csv-input" accept=".csv" style="display:none" onchange="handleCSVUpload(event)">
 
     <div class="settings-card">
+        <div id="remote-banner" class="remote-banner hidden">
+            <span data-i18n="Remote control active">Remote control active</span>
+            <button id="btn-remote-banner-end" class="remote-banner-end" data-i18n="End">End</button>
+        </div>
         <div id="status-text">Disconnected</div>
         <button id="btn-connect" class="btn-connect">Connect</button>
 
@@ -256,6 +261,59 @@
                style="color:var(--primary); font-weight:700; text-decoration:none; padding:10px 20px; border:2px solid var(--primary); border-radius:12px; transition:0.2s;" data-i18n="View on GitHub">
                View on GitHub
             </a>
+        </div>
+    </div>
+</div>
+
+<div id="remote-modal" class="modal-overlay">
+    <div class="modal" style="height:auto;">
+        <div class="modal-header">
+            <div class="modal-title" data-i18n="Remote Control">Remote Control</div>
+            <div class="modal-close" id="remote-modal-close">×</div>
+        </div>
+        <div class="modal-body remote-body">
+            <p class="remote-note" data-i18n="Remote requests run only after you confirm them here. Stop on this phone always overrides the remote controller.">Remote requests run only after you confirm them here. Stop on this phone always overrides the remote controller.</p>
+            <label class="remote-field">
+                <span data-i18n="Relay URL">Relay URL</span>
+                <input type="url" id="remote-relay-url" placeholder="wss://relay.example.com/ws" autocomplete="off" spellcheck="false">
+            </label>
+            <div class="remote-row">
+                <label class="remote-field">
+                    <span data-i18n="Max motor RPM">Max motor RPM</span>
+                    <input type="number" id="remote-max-rpm" min="400" max="7500" step="100">
+                </label>
+                <label class="remote-field">
+                    <span data-i18n="Max ball frequency">Max ball frequency</span>
+                    <input type="number" id="remote-max-freq" min="0" max="100" step="5">
+                </label>
+            </div>
+            <div id="remote-status" class="remote-status"></div>
+            <div id="remote-invite" class="remote-invite hidden">
+                <span data-i18n="Single-use invite link">Single-use invite link</span>
+                <input type="text" id="remote-invite-link" readonly>
+                <button id="btn-remote-copy" class="btn-modal btn-save" data-i18n="Share invite">Share invite</button>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button id="btn-remote-start" class="btn-modal btn-save" data-i18n="Start remote session">Start remote session</button>
+            <button id="btn-remote-end" class="btn-modal btn-remote-end hidden" data-i18n="End remote session">End remote session</button>
+        </div>
+    </div>
+</div>
+
+<div id="remote-confirm-modal" class="modal-overlay remote-confirm-overlay">
+    <div class="modal" style="height:auto;">
+        <div class="modal-header">
+            <div class="modal-title" data-i18n="Remote start request">Remote start request</div>
+        </div>
+        <div class="modal-body remote-body">
+            <div id="remote-confirm-details" class="remote-confirm-details"></div>
+            <div id="remote-confirm-countdown" class="remote-note"></div>
+            <p class="remote-note" data-i18n="Make sure nobody is in front of the robot before allowing.">Make sure nobody is in front of the robot before allowing.</p>
+        </div>
+        <div class="modal-footer">
+            <button id="btn-remote-decline" class="btn-modal btn-save-as" data-i18n="Decline">Decline</button>
+            <button id="btn-remote-accept" class="btn-modal btn-save" data-i18n="Allow">Allow</button>
         </div>
     </div>
 </div>

@@ -389,7 +389,7 @@ export function switchTab(catName, btn) {
     }
 }
 
-function formatDrillName(key) {
+export function formatDrillName(key) {
     if (key.startsWith('cust_')) return key; 
     return t(key.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()));
 }

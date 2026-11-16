@@ -1093,3 +1093,63 @@ input[type="number"]:disabled { opacity: 0.5; cursor: not-allowed; color: var(--
     transform: translateY(-50%);
     font-size: 0.8rem;
 }
+
+/* --- REMOTE CONTROL --- */
+.remote-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 8px 12px;
+    margin-bottom: 12px;
+    border-radius: 12px;
+    background: #6c5ce7;
+    color: white;
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+.remote-banner-end {
+    border: 2px solid white;
+    background: transparent;
+    color: white;
+    border-radius: 10px;
+    padding: 6px 14px;
+    font-weight: 700;
+    cursor: pointer;
+}
+.remote-body { display: flex; flex-direction: column; gap: 14px; padding-top: 5px; overflow-y: auto; }
+.remote-note { margin: 0; font-size: 0.8rem; color: var(--text-light); line-height: 1.4; }
+.remote-row { display: flex; gap: 10px; }
+.remote-field { display: flex; flex-direction: column; gap: 5px; flex: 1; font-size: 0.75rem; font-weight: 700; color: var(--text-light); }
+.remote-field input,
+.remote-field select,
+.remote-invite input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 0.95rem;
+}
+.remote-status { font-weight: 700; color: var(--text); text-align: center; }
+.remote-invite { display: flex; flex-direction: column; gap: 8px; font-size: 0.75rem; font-weight: 700; color: var(--text-light); }
+.btn-remote-end { background: var(--danger); color: white; flex: 1; }
+.remote-confirm-overlay { z-index: 300; }
+.remote-confirm-details { font-size: 1.1rem; font-weight: 800; color: var(--text); text-align: center; }
+
+/* Remote controller page */
+.controller-card { display: flex; flex-direction: column; gap: 14px; }
+.btn-remote-stop {
+    width: 100%;
+    padding: 22px;
+    border: none;
+    border-radius: 20px;
+    background: var(--danger);
+    color: white;
+    font-size: 1.4rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+.btn-remote-stop:disabled, .btn-connect:disabled { opacity: 0.4; cursor: not-allowed; }

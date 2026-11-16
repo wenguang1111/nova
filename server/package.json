@@ -1,0 +1,16 @@
+{
+  "name": "nova-remote-relay",
+  "private": true,
+  "type": "module",
+  "description": "Authenticated WebSocket relay for Nova remote control sessions",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node relay.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}

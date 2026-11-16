@@ -48,6 +48,7 @@ import {
 
 import { downloadDrill } from './cloud.js';
 import { initLanguage, t } from './i18n.js';
+import { initRemoteHost, openRemoteModal } from './remote.js';
 
 // --- Initialization ---
 
@@ -57,6 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderDrillButtons();
     updateStatsUI();
     setupEventListeners();
+    initRemoteHost();
     console.log("Nova Drill Control: Modules Loaded");
 });
 
@@ -132,6 +134,10 @@ function setupEventListeners() {
 window.toggleMenu = toggleMenu;
 window.setTheme = setTheme;
 window.switchTab = switchTab;
+window.openRemoteModal = () => {
+    toggleMenu();
+    openRemoteModal();
+};
 
 window.setLevel = (lvl, btn) => {
     setLevel(lvl);
