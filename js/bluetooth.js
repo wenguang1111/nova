@@ -2,6 +2,7 @@ import { SERVICE_UUID, UUID_S, UUID_N, UUID_W, SALT, MSG_DONE } from './constant
 import { log, showToast, MD5, clamp } from './utils.js';
 import { handleDone } from './runner.js';
 import { startSession } from './state.js'; // <--- ADDED IMPORT
+import { t } from './i18n.js';
 
 export const bleState = {
     isConnected: false,
@@ -14,7 +15,7 @@ let writeLock = Promise.resolve();
 
 export async function connectDevice() {
     try {
-        log("Scanning...");
+        log(t("Scanning..."));
         const device = await navigator.bluetooth.requestDevice({
             filters: [{ services: [SERVICE_UUID] }],
             optionalServices: [UUID_S]
@@ -40,7 +41,7 @@ export async function connectDevice() {
             sendPacket([0x07,0,0,0]); // Start handshake
         }
     } catch(e) {
-        log("Connect Error: " + e.message);
+        log(t("Connect Error: {error}", { error: e.message }));
     }
 }
 
@@ -56,15 +57,15 @@ function onDisconnect() {
     bleState.writeChar = null;
     bleState.handshakeState = "disconnected";
     
-    log("Disconnected");
-    showToast("Disconnected");
+    log(t("Disconnected"));
+    showToast(t("Disconnected"));
     document.dispatchEvent(new CustomEvent('connection-changed'));
 }
 
 export function sendPacket(data) {
-    if(!bleState.writeChar) return Promise.reject("No Write Char");
+    if(!bleState.writeChar) return Promise.reject(t("No Write Char"));
     const arr = new Uint8Array(data);
-    writeLock = writeLock.then(() => bleState.writeChar.writeValue(arr).catch(e => log("TX Error: " + e)));
+    writeLock = writeLock.then(() => bleState.writeChar.writeValue(arr).catch(e => log(t("TX Error: {error}", { error: e }))));
     return writeLock;
 }
 
@@ -97,8 +98,8 @@ function onNotify(e) {
         bleState.handshakeState = "ready";
         bleState.isConnected = true;
         startSession(); // <--- ADDED: Capture stats snapshot on connect
-        log("Ready");
-        showToast("Connected");
+        log(t("Ready"));
+        showToast(t("Connected"));
         document.dispatchEvent(new CustomEvent('connection-changed'));
     }
 

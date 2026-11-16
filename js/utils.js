@@ -1,3 +1,5 @@
+import { t } from './i18n.js';
+
 let toastTimer = null;
 
 export function log(msg) {
@@ -116,7 +118,7 @@ export function formatDuration(ms) {
     if (minutes >= 60) {
         const hours = Math.floor(minutes / 60);
         const remMin = minutes % 60;
-        return `${hours}h ${remMin}m`;
+        return t("{hours}h {minutes}m", { hours, minutes: remMin });
     }
     
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;

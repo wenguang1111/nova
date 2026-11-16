@@ -47,10 +47,12 @@ import {
 } from './runner.js';
 
 import { downloadDrill } from './cloud.js';
+import { initLanguage, t } from './i18n.js';
 
 // --- Initialization ---
 
 document.addEventListener('DOMContentLoaded', () => {
+    initLanguage();
     initData();
     renderDrillButtons();
     updateStatsUI();
@@ -182,7 +184,7 @@ window.stopRun = stopRun;
 
 window.handleDrillClick = (key, btn) => {
     if (!bleState.isConnected) {
-        showToast("Device not connected");
+        showToast(t("Device not connected"));
         return;
     }
     document.querySelectorAll('.btn-drill').forEach(b => b.classList.remove('running'));
@@ -242,7 +244,7 @@ window.performDownload = async () => {
     const code = codeInput.value.trim().toUpperCase();
 
     if (code.length !== 6) {
-        showToast("Invalid code (Must be 6 chars)");
+        showToast(t("Invalid code (Must be 6 chars)"));
         return;
     }
 
@@ -250,16 +252,16 @@ window.performDownload = async () => {
     // UPDATED LIMIT: 100
     if (userCustomDrills[selectedDownloadCat].length >= 100) {
         const catChar = selectedDownloadCat.split('-')[1].toUpperCase();
-        showToast(`Bank ${catChar} is full!`);
+        showToast(t("Bank {category} is full!", { category: catChar }));
         return;
     }
 
-    showToast("Searching...");
+    showToast(t("Searching..."));
 
     try {
         const data = await downloadDrill(code);
         if (!data) {
-            showToast("Code not found");
+            showToast(t("Code not found"));
             return;
         }
 
@@ -292,11 +294,11 @@ window.performDownload = async () => {
         const tabBtn = document.querySelector(`.tab-btn[onclick*="${selectedDownloadCat}"]`);
         if (tabBtn) switchTab(selectedDownloadCat, tabBtn);
 
-        showToast(`Imported to ${catChar}`);
+        showToast(t("Imported to {category}", { category: catChar }));
         toggleMenu(); // Close main menu if it was open behind modal
 
     } catch (e) {
         console.error(e);
-        showToast("Download Error");
+        showToast(t("Download Error"));
     }
 };

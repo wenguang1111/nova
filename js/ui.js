@@ -12,25 +12,26 @@ import {
 import { bleState } from './bluetooth.js';
 import { showToast, formatDuration } from './utils.js'; 
 import { openEditor } from './editor.js';
+import { t } from './i18n.js';
 
 // --- NEW: Handle Create New Drill ---
 window.handleCreateNewDrill = (category) => {
     // UPDATED LIMIT: 100
     if (userCustomDrills[category].length >= 100) {
-        showToast("Category is full (Max 100)");
+        showToast(t("Category is full (Max 100)"));
         return;
     }
 
-    const newName = prompt("Enter Name for New Drill:");
+    const newName = prompt(t("Enter Name for New Drill:"))?.trim();
     if (!newName) return;
 
     if (newName.length > 25) { 
-        showToast("Name too long (Max 25)"); 
+        showToast(t("Name too long (Max 25)"));
         return; 
     }
     
-    if (!/^[a-zA-Z0-9.\-#\[\]><\+\)\( ]+$/.test(newName)) { 
-        showToast("Invalid characters"); 
+    if (!/^[\p{L}\p{M}\p{N}.\-#\[\]><+)( ]+$/u.test(newName)) {
+        showToast(t("Invalid characters"));
         return; 
     }
 
@@ -50,7 +51,7 @@ window.handleCreateNewDrill = (category) => {
     saveDrillsToStorage();
 
     renderDrillButtons();
-    showToast(`Created ${newName}`);
+    showToast(t("Created {name}", { name: newName }));
     openEditor(newKey);
 };
 
@@ -83,7 +84,7 @@ window.handleTabDrop = (e, targetCat) => {
     
     // UPDATED LIMIT: 100
     if (userCustomDrills[targetCat].length >= 100) {
-        showToast(`Bank ${targetCat.split('-')[1].toUpperCase()} is full!`);
+        showToast(t("Bank {bank} is full!", { bank: targetCat.split('-')[1].toUpperCase() }));
         return;
     }
 
@@ -108,7 +109,7 @@ window.handleTabDrop = (e, targetCat) => {
     saveDrillsToStorage();
 
     renderDrillButtons(); 
-    showToast(`Moved to ${targetChar}`);
+    showToast(t("Moved to {bank}", { bank: targetChar }));
     
     const targetBtn = document.querySelector(`.tab-btn[onclick*="${targetCat}"]`);
     if(targetBtn) switchTab(targetCat, targetBtn);
@@ -145,7 +146,8 @@ export function renderDrillButtons() {
         const addBtn = document.createElement('button');
         addBtn.className = 'btn-swap'; 
         addBtn.style.cssText = "width:40px; height:40px; color:var(--primary); border-color:var(--primary); font-size:1.2rem; box-shadow:0 2px 5px rgba(0,0,0,0.1);";
-        addBtn.title = "Create New Drill";
+        addBtn.dataset.uiTitle = "Create New Drill";
+        addBtn.title = t("Create New Drill");
         
         addBtn.innerHTML = `
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
@@ -185,13 +187,14 @@ function createButton(container, key, label, allowSort, category) {
     btn.appendChild(iconDiv);
 
     const span = document.createElement('span');
+    span.className = 'drill-label';
     span.textContent = label;
     btn.appendChild(span);
 
     if (currentDrills[key] && currentDrills[key].random) {
         const rMark = document.createElement('div');
         rMark.className = 'mark-random';
-        rMark.textContent = 'R';
+        rMark.textContent = t('R');
         btn.appendChild(rMark);
     }
     
@@ -199,7 +202,8 @@ function createButton(container, key, label, allowSort, category) {
         const grip = document.createElement('div');
         grip.className = 'drill-grab-handle';
         grip.innerHTML = '≡'; 
-        grip.title = "Drag to reorder";
+        grip.dataset.uiTitle = "Drag to reorder";
+        grip.title = t("Drag to reorder");
         
         btn.draggable = false; 
 
@@ -338,14 +342,14 @@ export function updateDrillButtonStates() {
     
     if (btnConnect && statusText) {
         if (bleState.isConnected) {
-            btnConnect.textContent = "Disconnect";
+            btnConnect.textContent = t("Disconnect");
             btnConnect.classList.add('connected');
-            statusText.textContent = "Connected";
+            statusText.textContent = t("Connected");
             statusText.style.color = "#00b894";
         } else {
-            btnConnect.textContent = "Connect";
+            btnConnect.textContent = t("Connect");
             btnConnect.classList.remove('connected');
-            statusText.textContent = "Disconnected";
+            statusText.textContent = t("Disconnected");
             statusText.style.color = "var(--text-light)";
         }
     }
@@ -353,7 +357,7 @@ export function updateDrillButtonStates() {
 
 export function updateStatsUI() {
     const el = document.getElementById('stats-display');
-    if(el) el.textContent = `Balls: ${appStats.balls} | Drills: ${appStats.drills}`;
+    if(el) el.textContent = t("Balls: {balls} | Drills: {drills}", { balls: appStats.balls, drills: appStats.drills });
 }
 
 export function toggleMenu() {
@@ -387,7 +391,7 @@ export function switchTab(catName, btn) {
 
 function formatDrillName(key) {
     if (key.startsWith('cust_')) return key; 
-    return key.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    return t(key.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()));
 }
 
 // --- NEW: About Modal Handlers ---
@@ -425,3 +429,22 @@ window.closeSummaryModal = () => {
     const modal = document.getElementById('summary-modal');
     if(modal) modal.classList.remove('open');
 };
+
+document.addEventListener('language-changed', () => {
+    // Keep button instances, timers, drag state and running/highlight classes intact.
+    document.querySelectorAll('.btn-drill').forEach(btn => {
+        if (!btn.dataset.key.startsWith('cust_')) {
+            const label = btn.querySelector('.drill-label');
+            if (label) label.textContent = formatDrillName(btn.dataset.key);
+        }
+        const randomMark = btn.querySelector('.mark-random');
+        if (randomMark) randomMark.textContent = t('R');
+    });
+    document.querySelectorAll('[data-ui-title]').forEach(el => {
+        el.title = t(el.dataset.uiTitle);
+    });
+    updateDrillButtonStates();
+    updateStatsUI();
+    const timeValue = document.getElementById('sum-time-val');
+    if (timeValue) timeValue.textContent = formatDuration(getSessionSummary().duration);
+});

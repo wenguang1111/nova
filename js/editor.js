@@ -3,6 +3,7 @@ import { SPIN_LIMITS, RPM_MIN, RPM_MAX } from './constants.js';
 import { sendPacket, packBall, bleState } from './bluetooth.js';
 import { showToast, clamp, toggleBodyScroll } from './utils.js';
 import { uploadDrill } from './cloud.js';
+import { t } from './i18n.js';
 
 // --- Local State ---
 let tempDrillData = null;
@@ -84,7 +85,7 @@ export function saveDrillChanges() {
     saveDrillsToStorage();
 
     closeEditor();
-    showToast("Configuration saved");
+    showToast(t("Configuration saved"));
     document.dispatchEvent(new CustomEvent('drills-updated'));
 }
 
@@ -109,6 +110,18 @@ function reverseCalculate(top, bot) {
 }
 
 // --- RENDER EDITOR ---
+
+function refreshEditorLanguage() {
+    if (editingDrillKey) updateTitleDisplay(editingDrillKey);
+    document.querySelectorAll('#editor-body [data-editor-i18n]').forEach(el => {
+        el.textContent = t(el.dataset.editorI18n, { number: el.dataset.value });
+    });
+    document.querySelectorAll('#editor-body [data-editor-title]').forEach(el => {
+        el.title = t(el.dataset.editorTitle);
+    });
+}
+
+document.addEventListener('language-changed', refreshEditorLanguage);
 
 function renderEditor() {
     const modalBody = document.getElementById('editor-body');
@@ -145,7 +158,7 @@ function renderEditor() {
         const scatterHtml = isSingle ? `
             <div style="display:flex; align-items:center; gap:5px; margin-left:auto; margin-right:10px;">
                 <div class="editor-field" style="flex-direction:row; align-items:center; gap:6px; padding:2px 6px; background:var(--bg); border:1px solid var(--border);">
-                    <label style="font-size:0.6rem; color:var(--text-light); font-weight:800; text-transform:uppercase;">Scatter</label>
+                    <label data-editor-i18n="Scatter" style="font-size:0.6rem; color:var(--text-light); font-weight:800; text-transform:uppercase;"></label>
                     <input type="number" inputmode="decimal" 
                            value="${currentScatter}" 
                            step="0.5" min="0" max="${maxScatter}"
@@ -156,7 +169,7 @@ function renderEditor() {
 
         // Duplicate/Next Step Button (Header)
         const plusBtn = `
-            <button class="btn-add-opt" title="Duplicate Ball" onclick="window.handleAddSequenceStep(${stepIndex})">
+            <button class="btn-add-opt" data-editor-title="Duplicate Ball" onclick="window.handleAddSequenceStep(${stepIndex})">
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                     <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
@@ -166,7 +179,7 @@ function renderEditor() {
         groupDiv.innerHTML = `
             <div class="group-title">
                 <div style="display:flex; align-items:center; gap:10px; flex:1;">
-                    <span>Ball ${stepIndex + 1}</span>
+                    <span data-editor-i18n="Ball {number}" data-value="${stepIndex + 1}"></span>
                     <div class="ball-toggle ${isActive ? 'active' : ''}" onclick="window.handleToggleBallActive(${stepIndex})">
                         <div class="toggle-switch"></div>
                     </div>
@@ -201,14 +214,14 @@ function renderEditor() {
             // --- UPDATED: Swap Colors for Top/Back Toggle (Top=Blue, Back=Red) ---
             const toggleHtml = `
                 <div class="spin-row">
-                    <span class="spin-label">Rotation:</span>
+                    <span class="spin-label" data-editor-i18n="Rotation:"></span>
                     <div class="spin-capsule">
                         <div class="sc-opt ${type === 'top' ? 'active' : ''}" 
                              style="${type === 'top' ? 'background:#0984e3' : ''}"
-                             onclick="window.handleTypeToggle(${stepIndex}, ${optIndex}, 'top')">TOP</div>
+                             data-editor-i18n="TOP" onclick="window.handleTypeToggle(${stepIndex}, ${optIndex}, 'top')"></div>
                         <div class="sc-opt ${type === 'back' ? 'active' : ''}" 
                              style="${type === 'back' ? 'background:var(--danger)' : ''}"
-                             onclick="window.handleTypeToggle(${stepIndex}, ${optIndex}, 'back')">BACK</div>
+                             data-editor-i18n="BACK" onclick="window.handleTypeToggle(${stepIndex}, ${optIndex}, 'back')"></div>
                     </div>
                 </div>`;
             // ---------------------------------------------------------------------
@@ -217,33 +230,33 @@ function renderEditor() {
             const inputsHtml = `
                 <div class="editor-grid">
                     <div class="editor-field">
-                        <div class="field-header"><label>Speed</label><span class="range-hint">0-10</span></div>
+                        <div class="field-header"><label data-editor-i18n="Speed"></label><span class="range-hint">0-10</span></div>
                         <input type="number" inputmode="decimal" id="inp-speed-${stepIndex}-${optIndex}" value="${speed}" step="0.5" min="0" max="10"
                             onchange="window.handleEditorInput(${stepIndex}, ${optIndex}, 7, this.value)">
                     </div>
                     <div class="editor-field">
-                        <div class="field-header"><label>Spin</label><span class="range-hint" id="lbl-spin-${stepIndex}-${optIndex}">Max ${currentMaxSpin}</span></div>
+                        <div class="field-header"><label data-editor-i18n="Spin"></label><span class="range-hint" id="lbl-spin-${stepIndex}-${optIndex}" data-editor-i18n="Max {number}" data-value="${currentMaxSpin}"></span></div>
                         <input type="number" inputmode="decimal" id="inp-spin-${stepIndex}-${optIndex}" value="${spin}" step="0.5" min="0" max="${currentMaxSpin}"
                             style="${spinStyle}"
                             oninput="window.handleEditorInput(${stepIndex}, ${optIndex}, 8, this.value)">
                     </div>
                     <div class="editor-field">
-                        <div class="field-header"><label>Height</label><span class="range-hint">-50/100</span></div>
+                        <div class="field-header"><label data-editor-i18n="Height"></label><span class="range-hint">-50/100</span></div>
                         <input type="number" inputmode="decimal" value="${ballParams[2]}" step="1" min="-50" max="100"
                             oninput="window.handleEditorInput(${stepIndex}, ${optIndex}, 2, this.value)">
                     </div>
                     <div class="editor-field">
-                        <div class="field-header"><label>Drop</label><span class="range-hint">L/R</span></div>
+                        <div class="field-header"><label data-editor-i18n="Drop"></label><span class="range-hint" data-editor-i18n="L/R"></span></div>
                         <input type="number" inputmode="decimal" value="${ballParams[3]}" step="0.5" min="-10" max="10"
                             onchange="window.handleEditorInput(${stepIndex}, ${optIndex}, 3, this.value)">
                     </div>
                     <div class="editor-field">
-                        <div class="field-header"><label>BPM</label><span class="range-hint">30-90</span></div>
+                        <div class="field-header"><label data-editor-i18n="BPM"></label><span class="range-hint">30-90</span></div>
                         <input type="number" inputmode="decimal" value="${bpmValue}" step="1" min="30" max="90"
                             oninput="window.handleEditorInput(${stepIndex}, ${optIndex}, 4, this.value)">
                     </div>
                     <div class="editor-field">
-                        <div class="field-header"><label>Reps</label><span class="range-hint">#</span></div>
+                        <div class="field-header"><label data-editor-i18n="Reps"></label><span class="range-hint">#</span></div>
                         <input type="number" inputmode="decimal" value="${ballParams[5]}" step="1" min="1" max="100"
                             oninput="window.handleEditorInput(${stepIndex}, ${optIndex}, 5, this.value)">
                     </div>
@@ -255,16 +268,16 @@ function renderEditor() {
                 <div class="card-actions">
                      <button class="btn-action btn-act-test" 
                              onclick="window.handleTestBall(${stepIndex}, ${optIndex})" 
-                             ${isConnected && isActive ? '' : 'disabled'}>Test</button>
+                             data-editor-i18n="Test" ${isConnected && isActive ? '' : 'disabled'}></button>
                      <button class="btn-action btn-act-clone" 
-                             onclick="window.handleAddVariant(${stepIndex}, ${optIndex})">+ Variant</button>
+                             data-editor-i18n="+ Variant" onclick="window.handleAddVariant(${stepIndex}, ${optIndex})"></button>
                      <button class="btn-action btn-act-del" 
                              onclick="window.handleDeleteBall(${stepIndex}, ${optIndex})" 
-                             ${isLastBall ? 'disabled' : ''}>Delete</button>
+                             data-editor-i18n="Delete" ${isLastBall ? 'disabled' : ''}></button>
                 </div>
             `;
             
-            const label = stepOptions.length > 1 ? `<span class="option-label">Variant ${optIndex + 1}</span>` : '';
+            const label = stepOptions.length > 1 ? `<span class="option-label" data-editor-i18n="Variant {number}" data-value="${optIndex + 1}"></span>` : '';
             optDiv.innerHTML = label + toggleHtml + inputsHtml + actionsHtml;
             groupDiv.appendChild(optDiv);
         });
@@ -279,13 +292,14 @@ function renderEditor() {
         <button class="btn-swap" 
                 style="color:var(--primary); border-color:var(--primary); width:32px; height:32px;" 
                 onclick="window.handleAddSequenceStep(${tempDrillData.length - 1})" 
-                title="Add New Ball">
+                data-editor-title="Add New Ball">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="12" y1="5" x2="12" y2="19"></line>
                 <line x1="5" y1="12" x2="19" y2="12"></line>
             </svg>
         </button>`;
     modalBody.appendChild(addZone);
+    refreshEditorLanguage();
 }
 
 // --- HANDLERS ---
@@ -300,7 +314,7 @@ window.handleScatterChange = (stepIdx, value) => {
     const currentDrop = Math.abs(ball[3]);
     if (val + currentDrop > 10) {
         val = 10 - currentDrop;
-        showToast(`Limit is ${val} for this Drop position`);
+        showToast(t("Limit is {number} for this Drop position", { number: val }));
     }
     
     ball[10] = clamp(val, 0, 10);
@@ -339,7 +353,10 @@ window.handleEditorInput = (stepIdx, optIdx, paramIdx, value) => {
         const spinInput = document.getElementById(`inp-spin-${stepIdx}-${optIdx}`);
         const spinLabel = document.getElementById(`lbl-spin-${stepIdx}-${optIdx}`);
         if (spinInput) { spinInput.max = maxAllowed; spinInput.value = ball[8]; }
-        if (spinLabel) spinLabel.textContent = `Max ${maxAllowed}`;
+        if (spinLabel) {
+            spinLabel.dataset.value = maxAllowed;
+            spinLabel.textContent = t("Max {number}", { number: maxAllowed });
+        }
     }
 
     if (paramIdx === 7 || paramIdx === 8) {
@@ -385,7 +402,7 @@ window.handleAddVariant = (stepIndex, sourceOptIndex) => {
 
 window.handleDeleteBall = (stepIdx, optIdx) => {
     if (tempDrillData.length <= 1 && tempDrillData[0].length <= 1) {
-        showToast("Cannot delete last ball"); return;
+        showToast(t("Cannot delete last ball")); return;
     }
     tempDrillData[stepIdx].splice(optIdx, 1);
     if (tempDrillData[stepIdx].length === 0) tempDrillData.splice(stepIdx, 1);
@@ -420,13 +437,13 @@ window.selectSaveCategory = (val, btn) => {
 
 window.performSaveAs = () => {
     const newName = document.getElementById('save-name').value.trim();
-    if(!newName) { showToast("Enter a name"); return; }
-    if (newName.length > 40) { showToast("Name too long"); return; }
-    if (!/^[a-zA-Z0-9.\-#\[\]><\+\)\( ]+$/.test(newName)) { showToast("Invalid characters"); return; }
+    if(!newName) { showToast(t("Enter a name")); return; }
+    if (newName.length > 40) { showToast(t("Name too long")); return; }
+    if (!/^[\p{L}\p{M}\p{N}.\-#\[\]><+)( ]+$/u.test(newName)) { showToast(t("Invalid characters")); return; }
 
     const targetCat = selectedSaveCat;
     if (userCustomDrills[targetCat].length >= 100) { 
-            showToast("That bank is full (Max 100)!"); return; 
+            showToast(t("That bank is full (Max 100)!")); return;
     }
 
     const catChar = targetCat.split('-')[1].toUpperCase(); 
@@ -451,12 +468,12 @@ window.performSaveAs = () => {
     
     const tabBtn = document.querySelector(`.tab-btn[onclick*="${targetCat}"]`);
     if (tabBtn) switchTab(targetCat, tabBtn);
-    showToast(`Saved to ${catChar}`);
+    showToast(t("Saved to {bank}", { bank: catChar }));
 };
 
 window.handleDeleteDrill = () => {
     if (!editingDrillKey || !editingDrillKey.startsWith('cust_')) return;
-    if (!confirm("Delete this drill?")) return;
+    if (!confirm(t("Delete this drill?"))) return;
 
     const parts = editingDrillKey.split('_');
     const catKey = `custom-${parts[1].toLowerCase()}`;
@@ -469,7 +486,7 @@ window.handleDeleteDrill = () => {
     localStorage.setItem('custom_data', JSON.stringify(userCustomDrills));
 
     closeEditor();
-    showToast("Drill Deleted");
+    showToast(t("Drill Deleted"));
     document.dispatchEvent(new CustomEvent('drills-updated'));
 };
 
@@ -477,11 +494,12 @@ window.handleRenameDrill = () => {
     if (!editingDrillKey || !editingDrillKey.startsWith('cust_')) return;
     
     const nameEl = document.getElementById('editor-drill-name');
-    const currentName = nameEl ? nameEl.textContent : "New Drill";
-    
-    const newName = prompt("Rename Drill:", currentName);
+    const currentName = nameEl ? nameEl.textContent : t("New Drill");
+
+    const newName = prompt(t("Rename Drill:"), currentName)?.trim();
     if (!newName || newName === currentName) return;
-    if (newName.length > 40) { showToast("Name too long"); return; }
+    if (newName.length > 40) { showToast(t("Name too long")); return; }
+    if (!/^[\p{L}\p{M}\p{N}.\-#\[\]><+)( ]+$/u.test(newName)) { showToast(t("Invalid characters")); return; }
 
     const parts = editingDrillKey.split('_'); 
     const catChar = parts[1]; 
@@ -501,17 +519,16 @@ window.handleRenameDrill = () => {
         localStorage.setItem('custom_data', JSON.stringify(userCustomDrills)); 
         saveDrillsToStorage(); 
         updateTitleDisplay(newKey);
-        showToast("Renamed");
+        showToast(t("Renamed"));
         document.dispatchEvent(new CustomEvent('drills-updated'));
     }
 };
 
-function updateTitleDisplay(key) {
+function getDrillName(key, translateFactory = true) {
     let displayName = key;
-    let isCustom = false;
     
     if (key.startsWith('cust_')) {
-        isCustom = true;
+        // Custom names are always displayed and shared exactly as stored.
         const parts = key.split('_');
         if (parts.length >= 3) {
            const catKey = `custom-${parts[1].toLowerCase()}`;
@@ -519,8 +536,15 @@ function updateTitleDisplay(key) {
            displayName = entry ? entry.name : key.replace(/^cust_[A-C]_/, '');
         }
     } else {
-        displayName = key.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        const sourceName = key.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        displayName = translateFactory ? t(sourceName) : sourceName;
     }
+    return displayName;
+}
+
+function updateTitleDisplay(key) {
+    const displayName = getDrillName(key);
+    const isCustom = key.startsWith('cust_');
     
     const nameEl = document.getElementById('editor-drill-name');
     const iconEl = document.getElementById('editor-drill-edit-icon');
@@ -544,7 +568,7 @@ function updateTitleDisplay(key) {
 }
 
 window.handleTestBall = async (stepIdx, optIdx) => {
-    if (!bleState.isConnected) { showToast("Device not connected"); return; }
+    if (!bleState.isConnected) { showToast(t("Device not connected")); return; }
     const d = tempDrillData[stepIdx][optIdx];
     const ballData = packBall(d[0], d[1], d[2], d[3], d[4], 1); 
     const buffer = new ArrayBuffer(31); 
@@ -554,12 +578,12 @@ window.handleTestBall = async (stepIdx, optIdx) => {
     view.setUint16(4, 1, true); 
     view.setUint8(6, 0);
     new Uint8Array(buffer).set(ballData, 7);
-    try { await sendPacket(new Uint8Array(buffer)); showToast("Test Ball Fired"); } 
-    catch (e) { console.error(e); showToast("Test Failed"); }
+    try { await sendPacket(new Uint8Array(buffer)); showToast(t("Test Ball Fired")); }
+    catch (e) { console.error(e); showToast(t("Test Failed")); }
 };
 
 window.handleTestCombo = async () => {
-    if (!bleState.isConnected) { showToast("Device not connected"); return; }
+    if (!bleState.isConnected) { showToast(t("Device not connected")); return; }
     if (!tempDrillData || tempDrillData.length === 0) return;
     const balls = [];
     tempDrillData.forEach(stepOptions => {
@@ -583,7 +607,7 @@ window.handleTestCombo = async () => {
         
         balls.push(packBall(d[0], d[1], d[2], d[3], d[4], 1));
     });
-    if (balls.length === 0) { showToast("No active balls"); return; }
+    if (balls.length === 0) { showToast(t("No active balls")); return; }
     const totalLen = 7 + (balls.length * 24);
     const buffer = new ArrayBuffer(totalLen);
     const view = new DataView(buffer);
@@ -594,15 +618,13 @@ window.handleTestCombo = async () => {
     view.setUint8(6, 0);
     let offset = 7;
     balls.forEach(b => { uint8.set(b, offset); offset += 24; });
-    try { await sendPacket(uint8); showToast("Testing Drill..."); } 
-    catch (e) { console.error(e); showToast("Test Failed"); }
+    try { await sendPacket(uint8); showToast(t("Testing Drill...")); }
+    catch (e) { console.error(e); showToast(t("Test Failed")); }
 };
 
 window.handleShareDrill = async () => {
     if (!editingDrillKey || !tempDrillData) return;
-    let drillName = "Shared Drill";
-    const nameEl = document.getElementById('editor-drill-name');
-    if(nameEl) drillName = nameEl.textContent;
+    const drillName = getDrillName(editingDrillKey, false);
 
     const payload = {
         name: drillName,
@@ -620,13 +642,13 @@ window.handleShareDrill = async () => {
         const code = await uploadDrill(payload);
         if (navigator.clipboard && navigator.clipboard.writeText) {
              await navigator.clipboard.writeText(code);
-             alert(`Drill Shared Successfully!\n\nCode: ${code}\n\n(Copied to clipboard)`);
+             alert(t("Drill Shared Successfully!\n\nCode: {code}\n\n(Copied to clipboard)", { code }));
         } else {
-             prompt("Drill Shared! Copy this code:", code);
+             prompt(t("Drill Shared! Copy this code:"), code);
         }
     } catch (e) {
         console.error("Share Error:", e);
-        showToast("Share failed. Check network.");
+        showToast(t("Share failed. Check network."));
     } finally {
         btn.innerHTML = originalHtml;
         btn.disabled = false;

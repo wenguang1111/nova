@@ -1,4 +1,4 @@
-import { showToast } from './utils.js';
+import { t } from './i18n.js';
 
 const API_URL = 'https://nova.varandal.de/api/collections/shared_drills/records';
 
@@ -28,7 +28,7 @@ export async function uploadDrill(drillPayload) {
         retries++;
     }
 
-    if (!code) throw new Error("Could not generate unique code. Server busy?");
+    if (!code) throw new Error(t("Could not generate unique code. Server busy?"));
 
     // 2. Upload Data
     const response = await fetch(API_URL, {
@@ -40,7 +40,7 @@ export async function uploadDrill(drillPayload) {
         })
     });
 
-    if (!response.ok) throw new Error("Upload failed");
+    if (!response.ok) throw new Error(t("Upload failed"));
     return code;
 }
 
@@ -52,7 +52,7 @@ export async function downloadDrill(code) {
     const url = `${API_URL}?filter=(share_code='${cleanCode}')`;
     
     const response = await fetch(url);
-    if (!response.ok) throw new Error("Network error");
+    if (!response.ok) throw new Error(t("Network error"));
 
     const json = await response.json();
     

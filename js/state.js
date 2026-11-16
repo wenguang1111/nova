@@ -1,5 +1,6 @@
 import { DEFAULT_DRILLS, RPM_MIN, RPM_MAX, SPIN_LIMITS, CATEGORIES } from './constants.js';
 import { showToast } from './utils.js';
+import { t } from './i18n.js';
 
 export let currentDrills = {};
 export let userCustomDrills = { "custom-a": [], "custom-b": [], "custom-c": [] };
@@ -55,7 +56,7 @@ export function initData() {
             ['basic', 'combined', 'complex'].forEach(cat => {
                 if(parsedOrder[cat]) drillOrder[cat] = parsedOrder[cat];
             });
-        } catch(e) { console.error("Error loading drill order", e); }
+        } catch(e) { console.error(t("Error loading drill order"), e); }
     }
 
     currentDrills = savedDrills ? JSON.parse(savedDrills) : 
@@ -88,34 +89,34 @@ export function saveDrillOrder() {
 }
 
 export function saveAsDefault() {
-    if(confirm("Save current settings as your new personal default?")) {
+    if(confirm(t("Save current settings as your new personal default?"))) {
         localStorage.setItem('user_defaults', JSON.stringify(currentDrills));
-        showToast("Saved as Default");
+        showToast(t("Saved as Default"));
     }
 }
 export function resetToDefault() {
     const hasUserDefault = localStorage.getItem('user_defaults');
-    if(confirm(hasUserDefault ? "Restore saved defaults?" : "Restore factory settings?")) {
+    if(confirm(t(hasUserDefault ? "Restore saved defaults?" : "Restore factory settings?"))) {
         currentDrills = hasUserDefault ? JSON.parse(hasUserDefault) : JSON.parse(JSON.stringify(DEFAULT_DRILLS));
         drillOrder = JSON.parse(JSON.stringify(CATEGORIES));
         localStorage.removeItem('drill_order');
         normalizeDrills();
         localStorage.setItem('custom_drills', JSON.stringify(currentDrills));
-        showToast("Restored");
+        showToast(t("Restored"));
         document.dispatchEvent(new CustomEvent('drills-updated'));
     }
 }
 export function factoryReset() {
-    if(confirm("WARNING: Delete ALL saved data and return to original factory state?")) {
+    if(confirm(t("WARNING: Delete ALL saved data and return to original factory state?"))) {
         localStorage.clear();
         location.reload();
     }
 }
 export function resetStats() {
-    if(confirm("Reset stats?")) {
+    if(confirm(t("Reset stats?"))) {
         appStats.balls = 0; appStats.drills = 0;
         localStorage.setItem('nova_stats', JSON.stringify(appStats));
-        showToast("Statistics Reset");
+        showToast(t("Statistics Reset"));
         document.dispatchEvent(new CustomEvent('stats-updated'));
     }
 }
@@ -256,14 +257,14 @@ export function importCustomDrills(csvText) {
 
         localStorage.setItem('custom_data', JSON.stringify(userCustomDrills));
         saveDrillsToStorage();
-        showToast("Imported Successfully");
+        showToast(t("Imported Successfully"));
         
         // --- NEW: CLOSE MENU ON SUCCESS ---
         const menu = document.getElementById('theme-menu');
         if(menu) menu.classList.remove('open');
         
         return true;
-    } catch(e) { console.error(e); showToast("Import Failed"); return false; }
+    } catch(e) { console.error(e); showToast(t("Import Failed")); return false; }
 }
 
 // --- EXPORT FUNCTION (Closes Menu on Success) ---
