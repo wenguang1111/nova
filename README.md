@@ -1,7 +1,9 @@
 # Nova S Pro Drill Control
 
-A pretty web client for the Nova S Pro table tennis robot. 
-This tool can be used as a replacement for the original app, removing the requirements for server connectivity and user login.
+A web client for the Nova S Pro table tennis robot by [wenguang1111](https://github.com/wenguang1111).
+It replaces the original app: no account, no vendor server, works in a Chromium-based browser over Web Bluetooth.
+
+Live: **https://wenguang1111.github.io/nova/**
 
 | Main | Editor | Countdown |
 | :---: | :---: | :---: |
@@ -9,56 +11,55 @@ This tool can be used as a replacement for the original app, removing the requir
 
 ## Usage
 
-**Online/Offline:**
+**Online:** open https://wenguang1111.github.io/nova/ and tap *Connect*. Self-hosting needs HTTPS (Web Bluetooth requirement).
 
-  * Visit: [https://wenguang1111.github.io/nova/](https://wenguang1111.github.io/nova/) (after enabling GitHub Pages and deploying).
-  * Self hosting: https is required
+**Local:** download the repository and serve it, for example `python3 -m http.server`, then open `http://localhost:8000`.
 
-**Local:**
+**Requirements**
 
-  * Download repository files and host locally (e.g., `python3 -m http.server`).
-
-**Docker:**
-
-  * visit https://github.com/elton-bt/nova
-
-**Requirements:**
-
-  * Chrome, Cromite or any other Chromium-based browser. iPhone is not supported as it uses Webkit browser engine.
-
+  * Android: Chrome, Cromite or another Chromium-based browser.
+  * iPhone: Safari and Chrome for iOS have no Web Bluetooth. Use the Bluefy browser (tested by the author).
+  * Keep the screen on during a drill. The page asks the browser to keep it awake; if the phone still dims or locks, the browser suspends the page and the drill stops.
 
 ## Features
 
 **General**
 
-  * **Fully customizable drills** Add and remove drills and balls. Share, export and import settings.
-  * **Data Persistence:** Settings and drills saved to browser local storage.
+  * **Fully customizable drills:** add and remove drills and balls; export and import settings as CSV.
+  * **Data persistence:** settings and drills are saved in the browser's local storage on that device. Nothing is uploaded unless you share a drill.
   * **Themes:** 4 options, including dark mode.
-  * **Languages:** Simplified Chinese / English / German, following the device language with a saved preference.
-  * **Stratistics:**  accumulated counters (total balls/drills).<br>
+  * **Languages:** English, Simplified Chinese and German. The first visit follows the device language; the menu lets you switch.
+  * **Statistics:** accumulated counters (total balls and drills).
+  * **Version label:** shown at the bottom right of the main page, so you can check which build you are running.
 
+**Drill management**
 
-**Drill Management**
+  * **Edit and create:** modify pre-programmed drills or create custom ones in groups A, B and C (up to 100 each).
+  * **Randomization:** randomize ball sequences or configure several variants of a single ball.
+  * **Scatter:** randomize the drop point of a ball (drop point ± scatter).
+  * **Drag and drop:** reorder drills or move them between categories.
+  * **Controls:** drill length by time or repetitions, pause, stop, countdown (tap to skip).
 
-  * **Edit & Create:** Modify pre-programmed drills or create custom ones (Groups A, B, C).
-  * **Sharing:** Import/export via CSV or share online specific drills using codes.
-  * **Randomization:** Randomize ball sequences or configure multiple variants of a single ball.
-  * **Scatter:** Randomize drop point (DP) of a single ball. Configured DP +/- scatter value.
-  * **Drag-and-Drop Management:** Easily reorder drill sequences or move drills between categories using drag-and-drop.
-  * **Controls:** Set drill duration (time or repetitions), pause/stop, and countdown timers.
-  * **Tap to skip:** Starting countdown timer can be skipped by tapping on it.<br>
+**Editor tools**
 
+  * **Drill editor:** long-press a drill button. Delete, *Save As*, test the whole sequence, and share.
+  * **Ball editor:** add or remove balls, change the order, rename drills, test a single ball without saving.
 
-**Editor Tools**
+**Sharing drills**
 
-  * **Drill Editor:** Long-press drill button to access. Supports deletion, "save as", and testing entire sequences.
-  * **Ball Editor:** Add/remove balls, adjust sequence, rename drills, and test single balls without saving.
+  * **Share:** in the editor, *Share* uploads the current drill to the author's Google Drive folder together with your name and a short description. The Drive folder ID is kept in an Apps Script and is not part of this repository.
+  * **Download Drill:** in the menu, enter the password to see all shared drills, tick the ones you want and import them into Custom A, B or C. Existing drills are never overwritten.
+  * Set-up and security notes: [docs/drive-share.md](docs/drive-share.md).
 
-## Custom Drills (CSV)
+**Remote control (experimental)**
 
-Drills can be imported via CSV. Each category (A, B, C) holds 100 drills; each drill holds 20 balls. Variant balls (pseudo-randomness) share the same ball number.
+  A person elsewhere can request drills through a relay server; the phone next to the robot must confirm every start. See [docs/remote-testing.md](docs/remote-testing.md). This is not a fail-safe: someone on site must always be able to switch the robot off.
 
-**CSV Format:** `Set;Ball;Name;Speed;Spin;Type;Height;Drop;BPM;Reps`
+## Custom drills (CSV)
+
+Drills can be imported and exported as CSV. Variant balls (pseudo-randomness) share the same ball number.
+
+**CSV format:** `Set;Ball;Name;Speed;Spin;Type;Height;Drop;BPM;Reps`
 
 **Example:**
 
@@ -69,31 +70,24 @@ B;1;Drill B1;7.5;5;top;50;-5;60;1
 B;1;Drill B1;7.5;5;back;50;5;60;1
 ```
 
-## Technical Parameters
+The CSV is not a full backup: it does not contain random order, the enabled flag of a ball, scatter, statistics or theme.
+
+## Technical parameters
 
 | Parameter | Description | Range | Step |
 | :--- | :--- | :--- | :--- |
-| **Spin type** |top/back | - | - |
+| **Spin type** | top / back | - | - |
 | **Speed** | ball speed | 0 - 10 | 0.5 |
 | **Spin** | ball spin | 0 - 10 | 0.5 |
-| **Height** | Ball height | -50 (down) to 100 (up) | 1 |
-| **Drop** | Drop point | -10 (right) to 10 (left) | 0.5 |
-| **bpm** | balls/minute | 30 - 90 | 1 |
-| **Reps** | Repetitions | 1 - 200 | 1 |
+| **Height** | ball height | -50 (down) to 100 (up) | 1 |
+| **Drop** | drop point | -10 (right) to 10 (left) | 0.5 |
+| **BPM** | balls per minute | 30 - 90 | 1 |
+| **Reps** | repetitions | 1 - 200 | 1 |
 
+## Credits
 
-## Credits & Support
+This project is a fork of [olanga/nova](https://github.com/olanga/nova) (Nova S Pro Drill Control, web client 2.3a at the time of forking). The Bluetooth protocol, drill editor and the original interface come from that project, which in turn is based on findings by [smee](https://github.com/smee/nova-s-custom-drills) and plunder. Thank you.
 
-Upstream control client: [olanga/nova](https://github.com/olanga/nova). This fork retains the original control features and adds bilingual UI and GitHub Pages deployment for `wenguang1111/nova`.
+What this fork adds: German and Chinese translations with device-language detection, a screen wake lock during drills, Google Drive drill sharing with a password-protected download list, remote control through a relay server, and GitHub Pages deployment.
 
-Additional informations: [Wiki](https://github.com/olanga/nova/wiki/General-information)
-
-Spinsight measurements: [Wiki](https://github.com/olanga/nova/wiki/Spinsight-measurements-with-Nova-S-Pro)
-
-Based on findings by [smee](https://github.com/smee/nova-s-custom-drills) and plunder.
-
-PWA version 2.3a created by [Griizly](https://griizly.github.io/nova/)
-
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/E1E21PUFEQ)
-
-
+There is no license file in this repository or in the upstream project; all rights remain with the respective authors.
