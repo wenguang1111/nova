@@ -78,13 +78,13 @@ async function checkCodeExists(code) {
 // The folder ID lives only in the script's properties (see docs/drive-share.md).
 const DRIVE_UPLOAD_URL = 'https://script.google.com/macros/s/AKfycbxUvKjcJ4tIIKSS20U9QUMmtQdgQWQDo2hFlqseySEIcDwlHYEnKIvTmT5gc3xnZ9Vv/exec';
 
-export async function shareDrillToDrive(name, csv) {
+export async function shareDrillToDrive({ name, author, description, csv }) {
     if (!DRIVE_UPLOAD_URL) throw new Error(t("Sharing is not configured"));
 
     // text/plain keeps this a CORS "simple request" (Apps Script cannot answer preflights).
     const response = await fetch(DRIVE_UPLOAD_URL, {
         method: 'POST',
-        body: JSON.stringify({ name, csv })
+        body: JSON.stringify({ name, author, description, csv })
     });
     if (!response.ok) throw new Error(t("Upload failed"));
 

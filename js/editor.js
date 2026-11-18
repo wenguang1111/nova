@@ -655,17 +655,35 @@ window.handleShareDrill = async () => {
     }
 };
 
-window.handleShareToDrive = async () => {
+window.handleShareToDrive = () => {
     if (!editingDrillKey || !tempDrillData) return;
-    const drillName = getDrillName(editingDrillKey, false);
-    if (!confirm(t("Upload \"{name}\" to the shared drill collection?", { name: drillName }))) return;
+    document.getElementById('share-author').value = localStorage.getItem('nova_share_author') || '';
+    document.getElementById('share-desc').value = getDrillName(editingDrillKey, false);
+    document.getElementById('share-modal').classList.add('open');
+    setTimeout(() => document.getElementById('share-author').focus(), 100);
+};
 
+window.closeShareModal = () => {
+    document.getElementById('share-modal').classList.remove('open');
+};
+
+window.performShareToDrive = async () => {
+    if (!editingDrillKey || !tempDrillData) return;
+    const author = document.getElementById('share-author').value.trim();
+    const description = document.getElementById('share-desc').value.trim();
+    if (!author) { showToast(t("Enter your name")); return; }
+    if (!/^[\p{L}\p{M}\p{N}._\- ]{1,30}$/u.test(author)) { showToast(t("Invalid characters")); return; }
+    if (!description) { showToast(t("Enter a description")); return; }
+
+    const drillName = getDrillName(editingDrillKey, false);
     const csv = CSV_HEADER + drillToCsvRows('A', drillName, tempDrillData);
 
-    const btn = document.querySelector('.btn-share-drive');
+    const btn = document.getElementById('btn-share-submit');
     btn.disabled = true;
     try {
-        await shareDrillToDrive(drillName, csv);
+        await shareDrillToDrive({ name: drillName, author, description, csv });
+        localStorage.setItem('nova_share_author', author);
+        window.closeShareModal();
         showToast(t("Shared. Thank you!"));
     } catch (e) {
         console.error("Drive share error:", e);

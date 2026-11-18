@@ -7,6 +7,7 @@ const MAX_ROWS = 600;
 const MAX_UPLOADS_PER_DAY = 200;
 const HEADER = 'Set;Ball;Name;Speed;Spin;Type;Height;Drop;BPM;Reps';
 const NAME_RE = /^[\p{L}\p{M}\p{N}.\-#\[\]><+)( ]{1,40}$/u;
+const AUTHOR_RE = /^[\p{L}\p{M}\p{N}._\- ]{1,30}$/u;
 const NUM = '-?\\d{1,3}(?:\\.\\d{1,2})?';
 
 function doPost(e) {
@@ -25,8 +26,10 @@ function handle(e) {
   const body = e && e.postData && e.postData.contents;
   if (!body || body.length > MAX_BODY_CHARS) throw new Error('Bad size');
 
-  const { name, csv } = JSON.parse(body);
+  const { name, author, description, csv } = JSON.parse(body);
   if (typeof name !== 'string' || !NAME_RE.test(name)) throw new Error('Bad name');
+  if (typeof author !== 'string' || !AUTHOR_RE.test(author)) throw new Error('Bad author');
+  if (typeof description !== 'string' || description.length < 1 || description.length > 100) throw new Error('Bad description');
   if (typeof csv !== 'string') throw new Error('Bad csv');
 
   // Strict row validation: only numbers and fixed words, so nothing that Sheets/Excel
@@ -47,8 +50,9 @@ function handle(e) {
   if (!folderId) throw new Error('Not configured');
   const stamp = Utilities.formatDate(new Date(), 'UTC', 'yyyyMMdd-HHmmss');
   const suffix = Utilities.getUuid().slice(0, 4);
-  DriveApp.getFolderById(folderId)
-    .createFile(stamp + '-' + suffix + '_' + name + '.csv', lines.join('\n') + '\n', MimeType.CSV);
+  const file = DriveApp.getFolderById(folderId)
+    .createFile(stamp + '-' + suffix + '_' + author + '_' + name + '.csv', lines.join('\n') + '\n', MimeType.CSV);
+  file.setDescription('Author: ' + author + '\nDescription: ' + description.replace(/[\u0000-\u001f\u007f]/g, ' '));
   return { ok: true };
 }
 

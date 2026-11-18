@@ -251,6 +251,30 @@
     </div>
 </div>
 
+<div id="share-modal" class="modal-overlay">
+    <div class="modal" style="height:auto; min-height:300px;">
+        <div class="modal-header">
+            <div class="modal-title" data-i18n="Share Your Drill">Share Your Drill</div>
+            <div class="modal-close" onclick="window.closeShareModal()">×</div>
+        </div>
+        <div class="modal-body" style="display:flex; flex-direction:column; gap:20px; padding-top:15px;">
+            <div class="control-pill" style="box-shadow:none; border:1px solid var(--border);">
+                <label data-i18n="Your Name (Max 30)">Your Name (Max 30)</label>
+                <input type="text" id="share-author" maxlength="30"
+                       style="text-align:center; font-size:1.2rem; color:var(--primary); font-weight:800; background:transparent;">
+            </div>
+            <div class="control-pill" style="box-shadow:none; border:1px solid var(--border);">
+                <label data-i18n="Short Description (Max 100)">Short Description (Max 100)</label>
+                <input type="text" id="share-desc" maxlength="100"
+                       style="text-align:center; font-size:1rem; color:var(--primary); font-weight:700; background:transparent;">
+            </div>
+        </div>
+        <div class="modal-footer">
+             <button id="btn-share-submit" class="btn-modal btn-save" onclick="window.performShareToDrive()" data-i18n="Share">Share</button>
+        </div>
+    </div>
+</div>
+
 <div id="about-modal" class="modal-overlay">
     <div class="modal" style="height:auto; width:85%; max-width:320px;">
         <div class="modal-header">
