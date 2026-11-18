@@ -509,6 +509,7 @@ input[type="number"]:disabled { opacity: 0.5; cursor: not-allowed; color: var(--
     line-height: 1.4; 
 }
 .log-box div { margin-bottom: 2px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 2px; }
+.log-box.visible { display: block; height: 240px; user-select: text; -webkit-user-select: text; }
 
 .footer-row { 
     display: flex; 

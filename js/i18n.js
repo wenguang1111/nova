@@ -8,6 +8,7 @@ const messages = {
     ...remoteMessages,
     'Nova Drill Control': 'Nova 球路控制',
     'Language': '语言',
+    'Show/Hide Log': '显示/隐藏日志',
     'Drill': '球路',
     'Download Drill': '下载球路',
     'Export Drills': '导出球路',
