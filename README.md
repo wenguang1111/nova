@@ -35,15 +35,15 @@ This tool can be used as a replacement for the original app, removing the requir
 2. 在 GitHub 仓库的 **Settings → Pages → Build and deployment → Source** 中选择 **GitHub Actions**。
 3. 在 **Actions → Deploy GitHub Pages** 中运行工作流（或再次推送 `main`）。部署成功后访问上述页面。
 
-`.github/workflows/pages.yml` 发布静态文件，不需要 Node 构建、账户登录或 GitHub token 写进前端。CSS/JS 使用相对路径，兼容 `/nova/` 子路径。保留原有蓝牙控制、球路编辑、随机/变体、CSV 导入导出、分享码和主题功能；`1.3/` 历史版本及独立 `converter.html` 工具保持原样。
+`.github/workflows/pages.yml` 发布静态文件，不需要 Node 构建、账户登录或 GitHub token 写进前端。CSS/JS 使用相对路径，兼容 `/nova/` 子路径。保留原有蓝牙控制、球路编辑、随机/变体、CSV 导入导出和主题功能，独立 `converter.html` 工具保持原样。`1.3/` 历史版本只保留在仓库中，不再发布到网站。
 
 手机控制需要 **HTTPS + 支持 Web Bluetooth 的浏览器**，推荐 Android Chrome。iPhone 的 Safari/常规 iOS Chrome 不提供本项目需要的 Web Bluetooth。电脑上的 `http://localhost` 可用于本地开发；手机访问电脑的普通 HTTP 局域网地址不满足蓝牙安全上下文要求。
 
 ## 界面语言
 
-右上角菜单 → **语言 / Language** 可切换 **简体中文 / English**。首次按浏览器首选语言选择，之后记住手动选择。切换不刷新页面，不重置连接或球路参数。
+右上角菜单 → **语言 / Language** 可切换 **简体中文 / English / Deutsch**。首次按设备（浏览器）语言偏好列表选择第一个受支持的语言，都不支持时用英文；之后记住手动选择。切换不刷新页面，不重置连接或球路参数。
 
-主控制页、球路编辑器、训练提示、对话框与内置球路显示名称均支持双语。用户填写的球路名称原样保存，支持中文；存储键、蓝牙协议及 CSV 字段仍保持原格式。翻译入口是 `js/i18n.js`，编辑与运行消息分别位于 `js/locales/`。
+主控制页、球路编辑器、训练提示、对话框与内置球路显示名称均支持三语。用户填写的球路名称原样保存，支持中文；存储键、蓝牙协议及 CSV 字段仍保持原格式。翻译入口是 `js/i18n.js`（中文），德语在 `js/locales/de.js`，编辑与运行消息分别位于 `js/locales/`。
 
 ## 手机设置保存在哪里？
 
@@ -61,7 +61,7 @@ This tool can be used as a replacement for the original app, removing the requir
 - 关闭页面、重新打开或刷新后，通常仍能恢复；清除网站数据、恢复出厂设置、隐私模式结束或浏览器清理存储后可能丢失。主页的临时难度、次数/时长、间隔选项并非全部持久化。
 - 换手机、换浏览器不会自动同步。由 `olanga.github.io` 换到 `wenguang1111.github.io` 属于不同来源，不能自动读取旧数据。同一 `https://wenguang1111.github.io` 下不同项目路径则共享同源存储，不能把路径当作隔离边界。
 - **导出球路** 会下载 `nova_drills_full.csv`；具体位置由手机浏览器/系统决定，通常在“下载”中。可在旧地址导出、在新地址导入。注意：现有 CSV **不是完整备份**，不含随机顺序、启用状态、落点偏移（scatter）、统计、主题或排列元数据；自定义球路仅导出等级 1，导入时复制到三个等级。导入会替换现有自定义球路列表，操作前先导出留存。
-- **分享球路** 是另一回事：主动分享会把所选球路名称、参数与随机标记上传到原有第三方服务 `https://nova.varandal.de`，生成分享码。自托管页面不等于自托管分享服务，也不提供自动云端备份。请勿在分享名称里放个人敏感信息。
+- **共享球路** 是另一回事：编辑器里的“共享”会把球路名称、参数、你填写的名字和描述上传到你自己的 Google Drive 文件夹（通过 Apps Script，见 `docs/drive-share.md`）；菜单里的“下载球路”需要密码，才能查看并导入这些共享球路。不提供自动云端备份。请勿在名字或描述里放个人敏感信息。
 
 ## 远程控制（实验性）
 

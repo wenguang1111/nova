@@ -23,6 +23,7 @@
             <select id="language-select">
                 <option value="zh-CN">简体中文</option>
                 <option value="en">English</option>
+                <option value="de">Deutsch</option>
             </select>
         </label>
         <div class="menu-title" data-i18n="Drill">Drill</div>
@@ -153,9 +154,6 @@
                 <div class="modal-close" onclick="closeEditor()">×</div>
             </div>
             <div class="header-actions">
-                <button class="btn-header-share" onclick="window.handleShareDrill()" title="Share Drill" data-i18n-title="Share Drill">
-                    <svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
-                </button>
                 <label class="random-toggle-container">
                     <span class="toggle-label" data-i18n="Random">Random</span>
                     <input type="checkbox" id="chk-drill-random">
@@ -203,23 +201,35 @@
             <div class="modal-title" data-i18n="Import Drill">Import Drill</div>
             <div class="modal-close" onclick="window.closeDownloadModal()">×</div>
         </div>
-        <div class="modal-body" style="display:flex; flex-direction:column; gap:20px; padding-top:15px;">
-            <div class="control-pill" style="box-shadow:none; border:1px solid var(--border);">
-                <label data-i18n="Share Code">Share Code</label>
-                <input type="text" id="dl-code" placeholder="ABC123" maxlength="6" 
-                       style="text-align:center; letter-spacing:4px; text-transform:uppercase; font-size:1.6rem; color:var(--primary); font-weight:800;">
-            </div>
-            <div>
-                <div class="section-label" style="text-align:center; margin-bottom:8px;" data-i18n="Select Destination">Select Destination</div>
-                <div class="mode-switch" id="dl-cat-switch">
-                    <div class="mode-option active" onclick="window.selectDlCategory('custom-a', this)" data-i18n="Custom A">Custom A</div>
-                    <div class="mode-option" onclick="window.selectDlCategory('custom-b', this)" data-i18n="Custom B">Custom B</div>
-                    <div class="mode-option" onclick="window.selectDlCategory('custom-c', this)" data-i18n="Custom C">Custom C</div>
+        <div id="dl-login">
+            <div class="modal-body" style="padding-top:15px;">
+                <div class="control-pill" style="box-shadow:none; border:1px solid var(--border);">
+                    <label data-i18n="Password">Password</label>
+                    <input type="password" id="dl-password" autocomplete="off"
+                           onkeydown="if(event.key==='Enter') window.loadSharedList()"
+                           style="text-align:center; font-size:1.4rem; color:var(--primary); font-weight:800; background:transparent;">
                 </div>
             </div>
+            <div class="modal-footer">
+                <button id="btn-dl-load" class="btn-modal btn-save" onclick="window.loadSharedList()" data-i18n="Load List">Load List</button>
+            </div>
         </div>
-        <div class="modal-footer">
-             <button class="btn-modal btn-save" onclick="window.performDownload()" data-i18n="Download &amp; Import">Download &amp; Import</button>
+        <div id="dl-picker" style="display:none;">
+            <div class="modal-body" style="display:flex; flex-direction:column; gap:15px; padding-top:15px;">
+                <div class="section-label" style="text-align:center;" data-i18n="Select drills to import">Select drills to import</div>
+                <div id="dl-list" class="dl-list"></div>
+                <div>
+                    <div class="section-label" style="text-align:center; margin-bottom:8px;" data-i18n="Select Destination">Select Destination</div>
+                    <div class="mode-switch" id="dl-cat-switch">
+                        <div class="mode-option active" onclick="window.selectDlCategory('custom-a', this)" data-i18n="Custom A">Custom A</div>
+                        <div class="mode-option" onclick="window.selectDlCategory('custom-b', this)" data-i18n="Custom B">Custom B</div>
+                        <div class="mode-option" onclick="window.selectDlCategory('custom-c', this)" data-i18n="Custom C">Custom C</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="btn-dl-import" class="btn-modal btn-save" onclick="window.performDownload()" data-i18n="Download &amp; Import">Download &amp; Import</button>
+            </div>
         </div>
     </div>
 </div>

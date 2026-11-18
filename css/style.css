@@ -698,12 +698,11 @@ input[type="number"]:disabled { opacity: 0.5; cursor: not-allowed; color: var(--
 #editor-modal .header-actions {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
     width: 100%;
 }
 
 /* Adjustments for buttons inside new layout */
-.btn-header-share { margin-right: 0; } 
 .random-toggle-container { margin-right: 0; }
 
 .modal-close { font-size: 1.5rem; color: var(--text-light); cursor: pointer; line-height: 1; }
@@ -957,22 +956,6 @@ input[type="number"]:disabled { opacity: 0.5; cursor: not-allowed; color: var(--
 .btn-act-del:hover { opacity: 0.8; }
 .btn-act-del:disabled { opacity: 0.3; cursor: not-allowed; }
 
-/* Share Button */
-.btn-header-share {
-    background: transparent;
-    border: none;
-    color: var(--primary);
-    cursor: pointer;
-    padding: 5px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.2s;
-    flex-shrink: 0;
-}
-.btn-header-share:hover { transform: scale(1.1); color: var(--text); }
-.btn-header-share svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-
 /* --- MODAL FOOTER --- */
 .modal-footer { 
     margin-top: 15px; 
@@ -982,7 +965,7 @@ input[type="number"]:disabled { opacity: 0.5; cursor: not-allowed; color: var(--
 }
 
 .btn-modal { 
-    padding: 12px 8px; 
+    padding: 12px 4px;
     border-radius: 10px; 
     border: none; 
     font-weight: 600; 
@@ -1163,3 +1146,26 @@ input[type="number"]:disabled { opacity: 0.5; cursor: not-allowed; color: var(--
     cursor: pointer;
 }
 .btn-remote-stop:disabled, .btn-connect:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* --- SHARED DRILL PICKER --- */
+.dl-list {
+    max-height: 40vh;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+}
+.dl-item {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+}
+.dl-item:last-child { border-bottom: none; }
+.dl-item input { margin-top: 4px; flex-shrink: 0; }
+.dl-text { min-width: 0; }
+.dl-name { font-weight: 700; color: var(--text); overflow-wrap: anywhere; }
+.dl-meta { font-size: 0.75rem; color: var(--text-light); }
+.dl-desc { font-size: 0.85rem; color: var(--text); overflow-wrap: anywhere; }
+.dl-empty { padding: 20px; text-align: center; color: var(--text-light); }

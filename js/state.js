@@ -333,3 +333,60 @@ export function exportCustomDrills() {
     const menu = document.getElementById('theme-menu');
     if(menu) menu.classList.remove('open');
 }
+
+// --- IMPORT SHARED DRILLS (from the Drive collection) ---
+
+const finite = (v, min, max) => Math.min(max, Math.max(min, Number.isFinite(v) ? v : min));
+
+// Parses one shared CSV (same format as export) into a ball sequence. Values come from
+// an untrusted source, so every field is clamped to the editor's own limits.
+function parseSharedCsv(csv) {
+    const steps = new Map();
+    csv.split(/\r?\n/).forEach((line, index) => {
+        if (!line.trim() || index === 0) return;
+        const parts = line.split(';');
+        if (parts.length < 10) return;
+        const ballNum = parseInt(parts[1]);
+        const type = parts[5].trim().toLowerCase() === 'back' ? 'back' : 'top';
+        const speed = finite(parseFloat(parts[3]), 0, 10);
+        const spin = Math.min(finite(parseFloat(parts[4]), 0, 10), SPIN_LIMITS[speed.toString()] ?? 10);
+        const height = finite(parseInt(parts[6]), -50, 100);
+        const drop = finite(parseFloat(parts[7]), -10, 10);
+        const freqPercent = finite((parseInt(parts[8]) - 30) / 0.6, 0, 100);
+        const reps = finite(parseInt(parts[9]), 1, 200);
+        const motors = calculateRPMs(speed, spin, type);
+        if (!steps.has(ballNum)) steps.set(ballNum, []);
+        steps.get(ballNum).push([motors.top, motors.bot, height, drop, freqPercent, reps, 1, speed, spin, type]);
+    });
+    return [...steps.keys()].sort((a, b) => a - b).map(k => steps.get(k));
+}
+
+// Appends the drills to a custom bank. Existing drills are never replaced.
+// Returns { added, skipped } where skipped counts drills that did not fit or were unreadable.
+export function importSharedDrills(items, category) {
+    const catChar = category.split('-')[1].toUpperCase();
+    let added = 0, skipped = 0;
+
+    items.forEach((item, i) => {
+        const sequence = parseSharedCsv(item.csv);
+        if (sequence.length === 0 || userCustomDrills[category].length >= 100) { skipped++; return; }
+
+        const base = String(item.name).substring(0, 40);
+        const taken = new Set(userCustomDrills[category].map(d => d.name));
+        let name = base;
+        for (let n = 1; taken.has(name); n++) {
+            const suffix = n === 1 ? ' (Imp)' : ` (Imp${n})`;
+            name = base.substring(0, 40 - suffix.length) + suffix;
+        }
+
+        const key = `cust_${catChar}_${name.replace(/\s+/g, '_')}_${Date.now()}_${i}`;
+        userCustomDrills[category].push({ name, key });
+        currentDrills[key] = { 1: sequence, 2: JSON.parse(JSON.stringify(sequence)), 3: JSON.parse(JSON.stringify(sequence)) };
+        added++;
+    });
+
+    localStorage.setItem('custom_data', JSON.stringify(userCustomDrills));
+    saveDrillsToStorage();
+    document.dispatchEvent(new CustomEvent('drills-updated'));
+    return { added, skipped };
+}

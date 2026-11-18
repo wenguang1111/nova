@@ -36,8 +36,6 @@ export const editorMessages = {
     'Test Failed': '测试失败',
     'No active balls': '没有启用的球',
     'Testing Drill...': '正在测试训练…',
-    'Drill Shared Successfully!\n\nCode: {code}\n\n(Copied to clipboard)': '训练分享成功！\n\n分享码：{code}\n\n（已复制到剪贴板）',
-    'Drill Shared! Copy this code:': '训练已分享！请复制此分享码：',
     'Share failed. Check network.': '分享失败，请检查网络。',
     'Category is full (Max 100)': '此分类已满（最多 100 项）',
     'Enter Name for New Drill:': '请输入新训练的名称：',

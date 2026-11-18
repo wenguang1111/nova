@@ -4,6 +4,7 @@ import {
     setMode, 
     resetStats, 
     importCustomDrills, 
+    importSharedDrills, 
     exportCustomDrills, 
     saveAsDefault, 
     resetToDefault, 
@@ -46,7 +47,7 @@ import {
     skipCountdown // <--- ADDED IMPORT
 } from './runner.js';
 
-import { downloadDrill } from './cloud.js';
+import { listSharedDrills, fetchSharedDrills } from './cloud.js';
 import { initLanguage, t } from './i18n.js';
 import { initRemoteHost, openRemoteModal } from './remote.js';
 
@@ -198,9 +199,22 @@ window.handleDrillClick = (key, btn) => {
     startDrillSequence(key);
 };
 
-// --- DOWNLOAD MODAL LOGIC (New) ---
+// --- SHARED DRILLS DOWNLOAD MODAL ---
 
 let selectedDownloadCat = 'custom-a';
+let downloadPassword = '';
+const MAX_DOWNLOAD_SELECTION = 30;
+
+function setDownloadStep(loggedIn) {
+    document.getElementById('dl-login').style.display = loggedIn ? 'none' : '';
+    document.getElementById('dl-picker').style.display = loggedIn ? '' : 'none';
+}
+
+function downloadErrorMessage(e) {
+    if (e.message === 'Wrong password') return t("Wrong password");
+    if (e.message === 'Too many attempts') return t("Too many attempts, try again later");
+    return t("Download Error");
+}
 
 // 1. Open the Modal
 window.handleDownloadDialog = () => {
@@ -210,9 +224,12 @@ window.handleDownloadDialog = () => {
 
     // Reset State
     selectedDownloadCat = 'custom-a';
-    const codeInput = document.getElementById('dl-code');
-    if (codeInput) codeInput.value = '';
-    
+    downloadPassword = '';
+    const pwInput = document.getElementById('dl-password');
+    pwInput.value = '';
+    document.getElementById('dl-list').replaceChildren();
+    setDownloadStep(false);
+
     // Reset Switch UI to default (A)
     const switchEl = document.getElementById('dl-cat-switch');
     if(switchEl) {
@@ -220,17 +237,14 @@ window.handleDownloadDialog = () => {
         if(switchEl.children[0]) switchEl.children[0].classList.add('active'); 
     }
 
-    const modal = document.getElementById('download-modal');
-    if(modal) {
-        modal.classList.add('open');
-        setTimeout(() => { if(codeInput) codeInput.focus(); }, 100);
-    }
+    document.getElementById('download-modal').classList.add('open');
+    setTimeout(() => pwInput.focus(), 100);
 };
 
 // 2. Close the Modal
 window.closeDownloadModal = () => {
-    const modal = document.getElementById('download-modal');
-    if(modal) modal.classList.remove('open');
+    downloadPassword = '';
+    document.getElementById('download-modal').classList.remove('open');
 };
 
 // 3. Handle Tab Switching inside Modal
@@ -242,69 +256,93 @@ window.selectDlCategory = (val, btn) => {
     }
 };
 
-// 4. Perform Download
-window.performDownload = async () => {
-    const codeInput = document.getElementById('dl-code');
-    if(!codeInput) return;
-    
-    const code = codeInput.value.trim().toUpperCase();
+// Server-provided text is untrusted: build the list with textContent only.
+function renderSharedList(drills) {
+    const box = document.getElementById('dl-list');
+    box.replaceChildren();
+    if (drills.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'dl-empty';
+        empty.textContent = t("No shared drills yet");
+        box.appendChild(empty);
+        return;
+    }
+    drills.forEach(d => {
+        const row = document.createElement('label');
+        row.className = 'dl-item';
+        const check = document.createElement('input');
+        check.type = 'checkbox';
+        check.value = d.id;
+        const text = document.createElement('div');
+        text.className = 'dl-text';
+        const title = document.createElement('div');
+        title.className = 'dl-name';
+        title.textContent = d.name;
+        const meta = document.createElement('div');
+        meta.className = 'dl-meta';
+        meta.textContent = `${d.author} · ${new Date(d.date).toLocaleDateString()}`;
+        const desc = document.createElement('div');
+        desc.className = 'dl-desc';
+        desc.textContent = d.description;
+        text.append(title, meta, desc);
+        row.append(check, text);
+        box.appendChild(row);
+    });
+}
 
-    if (code.length !== 6) {
-        showToast(t("Invalid code (Must be 6 chars)"));
+// 4. Check the password and load the list
+window.loadSharedList = async () => {
+    const password = document.getElementById('dl-password').value;
+    if (!password) { showToast(t("Enter the password")); return; }
+
+    const btn = document.getElementById('btn-dl-load');
+    btn.disabled = true;
+    showToast(t("Loading..."));
+    try {
+        renderSharedList(await listSharedDrills(password));
+        downloadPassword = password;
+        setDownloadStep(true);
+    } catch (e) {
+        console.error(e);
+        showToast(downloadErrorMessage(e));
+    } finally {
+        btn.disabled = false;
+    }
+};
+
+// 5. Download the ticked drills and import them
+window.performDownload = async () => {
+    const ids = [...document.querySelectorAll('#dl-list input:checked')].map(c => c.value);
+    if (ids.length === 0) { showToast(t("Select at least one drill")); return; }
+    if (ids.length > MAX_DOWNLOAD_SELECTION) {
+        showToast(t("Select up to {count} drills", { count: MAX_DOWNLOAD_SELECTION }));
         return;
     }
 
-    // Check capacity before calling server
-    // UPDATED LIMIT: 100
+    const catChar = selectedDownloadCat.split('-')[1].toUpperCase();
     if (userCustomDrills[selectedDownloadCat].length >= 100) {
-        const catChar = selectedDownloadCat.split('-')[1].toUpperCase();
         showToast(t("Bank {category} is full!", { category: catChar }));
         return;
     }
 
-    showToast(t("Searching..."));
-
+    const btn = document.getElementById('btn-dl-import');
+    btn.disabled = true;
+    showToast(t("Loading..."));
     try {
-        const data = await downloadDrill(code);
-        if (!data) {
-            showToast(t("Code not found"));
-            return;
-        }
+        const items = await fetchSharedDrills(downloadPassword, ids);
+        const { added, skipped } = importSharedDrills(items, selectedDownloadCat);
 
-        let name = data.name;
-        // Check for duplicates in the specific target category
-        const existingNames = userCustomDrills[selectedDownloadCat].map(d => d.name);
-        if (existingNames.includes(name)) {
-            name = `${name} (Imp)`;
-        }
-
-        // Unique Key Generation
-        const catChar = selectedDownloadCat.split('-')[1].toUpperCase();
-        const newKey = `cust_${catChar}_${name.replace(/\s+/g, '_')}_${Date.now()}`;
-
-        // Save Data
-        userCustomDrills[selectedDownloadCat].push({ name: name, key: newKey });
-        
-        const newDrillObj = { 1: [], 2: [], 3: [], random: data.random };
-        newDrillObj[selectedLevel] = data.params; 
-        currentDrills[newKey] = newDrillObj;
-
-        localStorage.setItem('custom_data', JSON.stringify(userCustomDrills));
-        saveDrillsToStorage();
-
-        // UI Refresh
-        renderDrillButtons();
         window.closeDownloadModal();
-        
-        // Auto-switch to the target tab
         const tabBtn = document.querySelector(`.tab-btn[onclick*="${selectedDownloadCat}"]`);
         if (tabBtn) switchTab(selectedDownloadCat, tabBtn);
 
-        showToast(t("Imported to {category}", { category: catChar }));
-        toggleMenu(); // Close main menu if it was open behind modal
-
+        showToast(skipped > 0
+            ? t("Imported {count} to {category}, skipped {skipped}", { count: added, category: catChar, skipped })
+            : t("Imported {count} to {category}", { count: added, category: catChar }));
     } catch (e) {
         console.error(e);
-        showToast(t("Download Error"));
+        showToast(downloadErrorMessage(e));
+    } finally {
+        btn.disabled = false;
     }
 };

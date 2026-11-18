@@ -30,7 +30,7 @@ jobs:
         run: |
           mkdir _site
           cp index.html remote.html converter.html README.md nova_drills_v2_example.csv _site/
-          cp -R css js images 1.3 _site/
+          cp -R css js images _site/
       - name: Upload site
         uses: actions/upload-pages-artifact@v3
         with:

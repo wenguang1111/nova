@@ -27,8 +27,6 @@ export const runtimeMessages = {
     "TX Error: {error}": "发送错误：{error}",
     "Ready": "就绪",
     "Connected": "已连接",
-    "Could not generate unique code. Server busy?": "无法生成唯一分享码，服务器可能繁忙。",
-    "Upload failed": "上传失败",
     "Network error": "网络错误",
     "{hours}h {minutes}m": "{hours}小时 {minutes}分钟"
 };

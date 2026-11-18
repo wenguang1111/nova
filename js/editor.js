@@ -2,7 +2,7 @@ import { currentDrills, userCustomDrills, selectedLevel, saveDrillsToStorage, CS
 import { SPIN_LIMITS, RPM_MIN, RPM_MAX } from './constants.js';
 import { sendPacket, packBall, bleState } from './bluetooth.js';
 import { showToast, clamp, toggleBodyScroll } from './utils.js';
-import { uploadDrill, shareDrillToDrive } from './cloud.js';
+import { shareDrillToDrive } from './cloud.js';
 import { t } from './i18n.js';
 
 // --- Local State ---
@@ -620,39 +620,6 @@ window.handleTestCombo = async () => {
     balls.forEach(b => { uint8.set(b, offset); offset += 24; });
     try { await sendPacket(uint8); showToast(t("Testing Drill...")); }
     catch (e) { console.error(e); showToast(t("Test Failed")); }
-};
-
-window.handleShareDrill = async () => {
-    if (!editingDrillKey || !tempDrillData) return;
-    const drillName = getDrillName(editingDrillKey, false);
-
-    const payload = {
-        name: drillName,
-        level: selectedLevel,
-        params: tempDrillData,
-        random: document.getElementById('chk-drill-random')?.checked || false
-    };
-
-    const btn = document.querySelector('.btn-header-share');
-    const originalHtml = btn.innerHTML;
-    btn.innerHTML = '<span style="font-size:10px">...</span>'; 
-    btn.disabled = true;
-
-    try {
-        const code = await uploadDrill(payload);
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-             await navigator.clipboard.writeText(code);
-             alert(t("Drill Shared Successfully!\n\nCode: {code}\n\n(Copied to clipboard)", { code }));
-        } else {
-             prompt(t("Drill Shared! Copy this code:"), code);
-        }
-    } catch (e) {
-        console.error("Share Error:", e);
-        showToast(t("Share failed. Check network."));
-    } finally {
-        btn.innerHTML = originalHtml;
-        btn.disabled = false;
-    }
 };
 
 window.handleShareToDrive = () => {
