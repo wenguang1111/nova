@@ -76,7 +76,7 @@ async function checkCodeExists(code) {
 
 // Google Apps Script web app that writes into the shared Drive folder.
 // The folder ID lives only in the script's properties (see docs/drive-share.md).
-const DRIVE_UPLOAD_URL = 'https://script.google.com/macros/s/AKfycbxUvKjcJ4tIIKSS20U9QUMmtQdgQWQDo2hFlqseySEIcDwlHYEnKIvTmT5gc3xnZ9Vv/exec';
+const DRIVE_UPLOAD_URL = 'https://script.google.com/macros/s/AKfycbzNVb1RUpjI4kSLLVlzrA2oOt-VmJIZsamODEQrSkJiEy7hLKMckw20yV9FpQSsK_Uj/exec';
 
 export async function shareDrillToDrive({ name, author, description, csv }) {
     if (!DRIVE_UPLOAD_URL) throw new Error(t("Sharing is not configured"));
