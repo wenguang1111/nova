@@ -1,6 +1,6 @@
 # Nova S Pro Drill Control
 
-A web client for the Nova S Pro table tennis robot by [wenguang1111](https://github.com/wenguang1111).
+A web client for the Nova and Nova S Pro table tennis robot by [wenguang1111](https://github.com/wenguang1111).
 It replaces the original app: no account, no vendor server, works in a Chromium-based browser over Web Bluetooth.
 
 Live: **https://wenguang1111.github.io/nova/**
@@ -18,7 +18,7 @@ Live: **https://wenguang1111.github.io/nova/**
 **Requirements**
 
   * Android: Chrome, Cromite or another Chromium-based browser.
-  * iPhone: Safari and Chrome for iOS have no Web Bluetooth. Use the Bluefy browser (tested by the author).
+  * iPhone: Safari and Chrome for iOS have no Web Bluetooth. Use the Bluefy browser.
   * Keep the screen on during a drill. The page asks the browser to keep it awake; if the phone still dims or locks, the browser suspends the page and the drill stops.
 
 ## Features
@@ -86,8 +86,6 @@ The CSV is not a full backup: it does not contain random order, the enabled flag
 
 ## Credits
 
-This project is a fork of [olanga/nova](https://github.com/olanga/nova) (Nova S Pro Drill Control, web client 2.3a at the time of forking). The Bluetooth protocol, drill editor and the original interface come from that project, which in turn is based on findings by [smee](https://github.com/smee/nova-s-custom-drills) and plunder. Thank you.
+This project is a fork of [olanga/nova](https://github.com/olanga/nova) (Nova S Pro Drill Control, web client 2.3a at the time of forking). The Bluetooth protocol, drill editor and the original interface come from that project, which in turn is based on findings by [smee](https://github.com/smee/nova-s-custom-drills) and plunder.
 
-What this fork adds: German and Chinese translations with device-language detection, a screen wake lock during drills, Google Drive drill sharing with a password-protected download list, remote control through a relay server, and GitHub Pages deployment.
-
-There is no license file in this repository or in the upstream project; all rights remain with the respective authors.
+What this fork adds: German and Chinese translations with device-language detection, a screen wake lock during drills.
