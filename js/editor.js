@@ -1,8 +1,8 @@
-import { currentDrills, userCustomDrills, selectedLevel, saveDrillsToStorage } from './state.js';
+import { currentDrills, userCustomDrills, selectedLevel, saveDrillsToStorage, CSV_HEADER, drillToCsvRows } from './state.js';
 import { SPIN_LIMITS, RPM_MIN, RPM_MAX } from './constants.js';
 import { sendPacket, packBall, bleState } from './bluetooth.js';
 import { showToast, clamp, toggleBodyScroll } from './utils.js';
-import { uploadDrill } from './cloud.js';
+import { uploadDrill, shareDrillToDrive } from './cloud.js';
 import { t } from './i18n.js';
 
 // --- Local State ---
@@ -651,6 +651,26 @@ window.handleShareDrill = async () => {
         showToast(t("Share failed. Check network."));
     } finally {
         btn.innerHTML = originalHtml;
+        btn.disabled = false;
+    }
+};
+
+window.handleShareToDrive = async () => {
+    if (!editingDrillKey || !tempDrillData) return;
+    const drillName = getDrillName(editingDrillKey, false);
+    if (!confirm(t("Upload \"{name}\" to the shared drill collection?", { name: drillName }))) return;
+
+    const csv = CSV_HEADER + drillToCsvRows('A', drillName, tempDrillData);
+
+    const btn = document.querySelector('.btn-share-drive');
+    btn.disabled = true;
+    try {
+        await shareDrillToDrive(drillName, csv);
+        showToast(t("Shared. Thank you!"));
+    } catch (e) {
+        console.error("Drive share error:", e);
+        showToast(t("Share failed. Check network."));
+    } finally {
         btn.disabled = false;
     }
 };

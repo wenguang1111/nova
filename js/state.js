@@ -268,23 +268,30 @@ export function importCustomDrills(csvText) {
 }
 
 // --- EXPORT FUNCTION (Closes Menu on Success) ---
+export const CSV_HEADER = "Set;Ball;Name;Speed;Spin;Type;Height;Drop;BPM;Reps\n";
+
+export function drillToCsvRows(setLabel, name, sequence) {
+    let rows = "";
+    sequence.forEach((stepOptions, stepIndex) => {
+        const ballNum = stepIndex + 1;
+        stepOptions.forEach(ball => {
+            let speed = ball[7], spin = ball[8], type = ball[9];
+            if (speed === undefined) {
+                const rev = reverseCalculate(ball[0], ball[1]);
+                speed = rev.speed; spin = rev.spin; type = rev.type;
+            }
+            const bpm = Math.round(30 + (ball[4] * 0.6));
+            rows += [setLabel, ballNum, name, speed, spin, type, ball[2], ball[3], bpm, ball[5]].join(";") + "\n";
+        });
+    });
+    return rows;
+}
+
 export function exportCustomDrills() {
-    let csvContent = "Set;Ball;Name;Speed;Spin;Type;Height;Drop;BPM;Reps\n";
-    
+    let csvContent = CSV_HEADER;
+
     const appendDrillToCSV = (setLabel, name, sequence) => {
-         sequence.forEach((stepOptions, stepIndex) => {
-             const ballNum = stepIndex + 1;
-             stepOptions.forEach(ball => {
-                 let speed = ball[7], spin = ball[8], type = ball[9];
-                 if (speed === undefined) {
-                     const rev = reverseCalculate(ball[0], ball[1]);
-                     speed = rev.speed; spin = rev.spin; type = rev.type;
-                 }
-                 const bpm = Math.round(30 + (ball[4] * 0.6));
-                 const row = [setLabel, ballNum, name, speed, spin, type, ball[2], ball[3], bpm, ball[5]].join(";");
-                 csvContent += row + "\n";
-             });
-         });
+        csvContent += drillToCsvRows(setLabel, name, sequence);
     };
 
     ['basic', 'combined', 'complex'].forEach(cat => {

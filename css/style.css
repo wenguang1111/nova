@@ -1025,6 +1025,15 @@ input[type="number"]:disabled { opacity: 0.5; cursor: not-allowed; color: var(--
 .btn-save-as:hover { background: rgba(0,0,0,0.05); }
 [data-theme="night"] .btn-save-as:hover { background: rgba(255,255,255,0.1); }
 
+.btn-share-drive {
+    background: transparent;
+    border: 2px solid var(--primary);
+    color: var(--primary);
+    flex: 1;
+}
+.btn-share-drive:hover { background: var(--primary-dim); }
+.btn-share-drive:disabled { opacity: 0.5; cursor: wait; }
+
 .btn-save { 
     background: transparent;
     border: 2px solid var(--primary);
