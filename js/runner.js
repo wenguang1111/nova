@@ -225,6 +225,7 @@ async function runIteration() {
 export function handleDone() {
     if(!isRunning) return;
     
+    log(`BLE: robot done (rep ${currentCount}/${targetCount})`);
     if (runConfig.mode === 'reps' && currentCount >= targetCount) {
         stopRun('finished');
         return;
@@ -233,6 +234,8 @@ export function handleDone() {
     const pauseMs = runConfig.pauseSec * 1000;
 
     if (!isPaused) {
+         // A repeated "done" notification must not schedule a second iteration.
+         clearTimeout(pauseTimer);
          pauseTimer = setTimeout(() => { 
              if(isRunning && !isPaused) runIteration(); 
          }, pauseMs);
@@ -281,7 +284,7 @@ export function stopRun(reason = 'stopped') {
     ui.overlay.classList.remove('open');
     document.querySelectorAll('.btn-drill').forEach(b => b.classList.remove('running'));
     
-    sendPacket([0x80,1,0,1]); // Stop command
+    sendPacket([0x80,1,0,1]).catch(() => {}); // Stop command (rejects if the robot already disconnected)
     log(t("Drill Stopped"));
     if (endedRun) {
         document.dispatchEvent(new CustomEvent('run-ended', {

@@ -1,6 +1,6 @@
 import { SERVICE_UUID, UUID_S, UUID_N, UUID_W, SALT, MSG_DONE } from './constants.js';
 import { log, showToast, MD5, clamp } from './utils.js';
-import { handleDone } from './runner.js';
+import { handleDone, stopRun, activeRunSource } from './runner.js';
 import { startSession } from './state.js'; // <--- ADDED IMPORT
 import { t } from './i18n.js';
 
@@ -64,6 +64,8 @@ function onDisconnect() {
     bleState.handshakeState = "disconnected";
     log(`BLE: disconnected during state "${state}"`);
     showToast(t("Disconnected"));
+    // A countdown or run cannot continue without the robot; do not leave the overlay hanging.
+    if (activeRunSource()) stopRun();
     document.dispatchEvent(new CustomEvent('connection-changed'));
 }
 
@@ -118,6 +120,7 @@ function onNotify(e) {
     }
 
     // Drill execution callback
+    if (bleState.handshakeState === "ready") log(`BLE RX: ${toHex(bytes)}`);
     if (hex.includes(MSG_DONE)) {
         handleDone();
     }
