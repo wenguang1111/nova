@@ -22,6 +22,34 @@ let activeDrillRandom = false;
 // Settings of the run in progress (null when idle): { drill, level, mode, reps, timeSec, pauseSec, source }.
 let runConfig = null;
 
+// Keep the screen on while a countdown or run is active. If the phone dims or locks, the
+// browser suspends this page and the run stalls (the robot then just sits idle).
+let wakeLock = null;
+
+async function acquireWakeLock() {
+    if (wakeLock) return;
+    try {
+        if (!navigator.wakeLock) throw new Error('not supported by this browser');
+        wakeLock = await navigator.wakeLock.request('screen');
+        wakeLock.addEventListener('release', () => { wakeLock = null; });
+    } catch (error) {
+        log(t('Screen wake lock unavailable: {error}', { error: error.message }));
+    }
+}
+
+function releaseWakeLock() {
+    const lock = wakeLock;
+    wakeLock = null;
+    lock?.release().catch(() => {});
+}
+
+// The browser drops the lock whenever the page is hidden; take it again when it returns.
+document.addEventListener('visibilitychange', () => {
+    if (!runConfig) return;
+    if (document.hidden) log('Page hidden during run: the browser may suspend it');
+    else acquireWakeLock();
+});
+
 // UI Elements (Cached for performance)
 const ui = {
     overlay: document.getElementById('run-overlay'),
@@ -86,6 +114,7 @@ export function startDrillSequence(drillName, config = localRunConfig()) {
 
     // --- LOCK SCROLL ON START ---
     toggleBodyScroll(true);
+    acquireWakeLock();
     ui.overlay.classList.add('open');
     
     showingGo = false;
@@ -281,6 +310,7 @@ export function stopRun(reason = 'stopped') {
     
     // --- UNLOCK SCROLL ON STOP ---
     toggleBodyScroll(false);
+    releaseWakeLock();
     ui.overlay.classList.remove('open');
     document.querySelectorAll('.btn-drill').forEach(b => b.classList.remove('running'));
     
