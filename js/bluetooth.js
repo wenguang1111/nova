@@ -29,12 +29,14 @@ export async function connectDevice() {
         const chars = await service.getCharacteristics();
         log(`BLE chars: ${chars.map(c => c.uuid.slice(4, 8)).join(', ')}`);
 
+        // Some iOS Web Bluetooth browsers report UUIDs in upper case.
         for(let c of chars) {
-            if(c.uuid === UUID_N) {
+            const uuid = c.uuid.toLowerCase();
+            if(uuid === UUID_N) {
                 await c.startNotifications();
                 c.addEventListener('characteristicvaluechanged', onNotify);
             }
-            if(c.uuid === UUID_W) bleState.writeChar = c;
+            if(uuid === UUID_W) bleState.writeChar = c;
         }
 
         if(bleState.writeChar) {
@@ -78,9 +80,12 @@ function toHex(bytes) {
 }
 
 function onNotify(e) {
-    const buf = e.target.value.buffer;
-    const hex = [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2,'0')).join('');
-    if (bleState.handshakeState !== "ready") log(`BLE RX [${bleState.handshakeState}]: ${toHex(new Uint8Array(buf))}`);
+    // Copy only this notification's bytes; the DataView may be a window into a larger buffer.
+    const view = e.target.value;
+    const bytes = new Uint8Array(view.buffer.slice(view.byteOffset, view.byteOffset + view.byteLength));
+    const buf = bytes.buffer;
+    const hex = [...bytes].map(b => b.toString(16).padStart(2,'0')).join('');
+    if (bleState.handshakeState !== "ready") log(`BLE RX [${bleState.handshakeState}]: ${toHex(bytes)}`);
 
     // Handshake Sequence
     if(bleState.handshakeState === "handshake") {
