@@ -27,6 +27,7 @@ export async function connectDevice() {
         const server = await device.gatt.connect();
         const service = await server.getPrimaryService(UUID_S);
         const chars = await service.getCharacteristics();
+        log(`BLE chars: ${chars.map(c => c.uuid.slice(4, 8)).join(', ')}`);
 
         for(let c of chars) {
             if(c.uuid === UUID_N) {
@@ -39,6 +40,8 @@ export async function connectDevice() {
         if(bleState.writeChar) {
             bleState.handshakeState = "handshake";
             sendPacket([0x07,0,0,0]); // Start handshake
+        } else {
+            log(`BLE: write characteristic ${UUID_W} not found`);
         }
     } catch(e) {
         log(t("Connect Error: {error}", { error: e.message }));
@@ -52,12 +55,12 @@ export function disconnectDevice() {
 }
 
 function onDisconnect() {
+    const state = bleState.handshakeState;
     bleState.isConnected = false;
     bleState.device = null;
     bleState.writeChar = null;
     bleState.handshakeState = "disconnected";
-    
-    log(t("Disconnected"));
+    log(`BLE: disconnected during state "${state}"`);
     showToast(t("Disconnected"));
     document.dispatchEvent(new CustomEvent('connection-changed'));
 }
@@ -65,13 +68,19 @@ function onDisconnect() {
 export function sendPacket(data) {
     if(!bleState.writeChar) return Promise.reject(t("No Write Char"));
     const arr = new Uint8Array(data);
+    if (bleState.handshakeState !== "ready") log(`BLE TX: ${toHex(arr)}`);
     writeLock = writeLock.then(() => bleState.writeChar.writeValue(arr).catch(e => log(t("TX Error: {error}", { error: e }))));
     return writeLock;
+}
+
+function toHex(bytes) {
+    return [...bytes].map(b => b.toString(16).padStart(2, '0')).join(' ');
 }
 
 function onNotify(e) {
     const buf = e.target.value.buffer;
     const hex = [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2,'0')).join('');
+    if (bleState.handshakeState !== "ready") log(`BLE RX [${bleState.handshakeState}]: ${toHex(new Uint8Array(buf))}`);
 
     // Handshake Sequence
     if(bleState.handshakeState === "handshake") {
